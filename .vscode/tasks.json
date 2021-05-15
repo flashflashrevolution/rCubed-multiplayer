@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"type": "java",
-			"label": "java: exportjar:sfs-new",
+			"label": "Export Jar",
 			"targetPath": "${workspaceFolder}/lib/MultiplayerExtension.jar",
 			"elements": [
 				"${compileOutput}",
@@ -18,6 +18,7 @@
 			"command": [
 				"javac",
 				"--class-path=sfs/SFS_PRO_1.6.6/Server/lib/json.jar:sfs/SFS_PRO_1.6.6/Server/lib/json-lib-2.1-jdk15.jar:sfs/SFS_PRO_1.6.6/Server/lib/jysfs.jar:lib/sqlbuilder-3.0.1.jar",
+				"--release",
 				"8",
 				"src/**/*.java"
 			],

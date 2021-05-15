@@ -9,19 +9,21 @@
 			{
 				"default": true,
 				"name": "JavaSE-1.8",
-				"path": "/workspaces/sfs-new/jdk/"
+				"path": "/workspaces/rCubed-multiplayer/jdk/"
 			}
 		],
 		"java.project.sourcePaths": [
 			"src",
 			"sfs/SFS_PRO_1.6.6/Server/lib/json.jar",
 			"sfs/SFS_PRO_1.6.6/Server/lib/json-lib-2.1-jdk15.jar",
-			"sfs/SFS_PRO_1.6.6/Server/lib/jysfs.jar"
+			"sfs/SFS_PRO_1.6.6/Server/lib/jysfs.jar",
+			"lib/sqlbuilder-3.0.1.jar"
 		],
 		"java.project.referencedLibraries": [
 			"sfs/SFS_PRO_1.6.6/Server/lib/json.jar",
 			"sfs/SFS_PRO_1.6.6/Server/lib/json-lib-2.1-jdk15.jar",
-			"sfs/SFS_PRO_1.6.6/Server/lib/jysfs.jar"
+			"sfs/SFS_PRO_1.6.6/Server/lib/jysfs.jar",
+			"lib/sqlbuilder-3.0.1.jar"
 		],
 		"terminal.integrated.defaultProfile.linux": "/bin/bash"
 	},

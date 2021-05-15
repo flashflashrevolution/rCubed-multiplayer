@@ -7,7 +7,6 @@ import it.gotoandplay.smartfoxserver.lib.ActionscriptObject;
 import it.gotoandplay.smartfoxserver.lib.SmartFoxLib;
 
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
-import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.CustomSql;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 
