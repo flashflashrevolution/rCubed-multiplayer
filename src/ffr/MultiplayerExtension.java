@@ -6,6 +6,8 @@ import it.gotoandplay.smartfoxserver.extensions.AbstractExtension;
 import it.gotoandplay.smartfoxserver.lib.ActionscriptObject;
 import it.gotoandplay.smartfoxserver.lib.SmartFoxLib;
 
+import java.util.function.Function;
+
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -28,13 +30,16 @@ public class MultiplayerExtension extends AbstractExtension {
 		username = SmartFoxLib.escapeQuotes(username);
 		password = SmartFoxLib.escapeQuotes(password);
 
-		DbSpec spec = new DbSpec();
-    	DbSchema schema = spec.addSchema("ffr_vb2");
-		DbTable ffrLoginSessionsTable = new DbTable(schema, "vb_user");
-		DbColumn passwordColumn = ffrLoginSessionsTable.addColumn("password", "varchar", 255);
-		DbColumn userNameColumn = ffrLoginSessionsTable.addColumn("username", "varchar", 100);
-		DbColumn userIdColumn = ffrLoginSessionsTable.addColumn("userid", "number", null);
-		DbColumn userGroupIdColumn = ffrLoginSessionsTable.addColumn("usergroupid", "number", null);
+		var spec = new DbSpec();
+		var schema = spec.addSchema("ffr_vb2");
+		var ffrLoginSessionsTable = new DbTable(schema, "vb_user");
+		var passwordColumn = ffrLoginSessionsTable.addColumn("password", "varchar", 255);
+		var userNameColumn = ffrLoginSessionsTable.addColumn("username", "varchar", 100);
+		var userIdColumn = ffrLoginSessionsTable.addColumn("userid", "number", null);
+		var userGroupIdColumn = ffrLoginSessionsTable.addColumn("usergroupid", "number", null);
+
+		Function<Integer, Double> ourFunc = i -> i * 10.0;
+		ourFunc.apply(10);
 
 		String selectSession = new SelectQuery()
 			.addCustomColumns(
