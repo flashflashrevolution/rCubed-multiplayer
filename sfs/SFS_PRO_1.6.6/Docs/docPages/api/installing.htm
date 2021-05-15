@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ <p class="title">4.1 Installing the Flash/Flex API </p>
+ <p>In order to talk to <strong>SmartFoxServer</strong> from Flash you will need
+   to install the
+   <strong>SmartFoxServer Client API.<br>
+   </strong>The API add new classes to your Flash / Flex environment that you can use to easily interact with the Server by sending requests and handling events.</p>
+ <p>After you have installed your copy of <strong>SmartFoxServer</strong> you will find a &quot;<strong>Flash
+   API</strong>&quot; folder in the main SFS directory. The folder contains two
+   different packages that can be easily installed, based on which version of
+   Flash / Flex you're using.</p>
+
+<!-- Version 1.6.0 and greater -->
+<p class="subTitle">&raquo; Installing with SmartFoxServer 1.6 and higher</p>
+
+<p style="border: 1px dotted #cc0000; padding:6px; background: #ffffee;">
+	<strong>SmartFoxServer 1.6.x note:</strong><br>
+	Due to the various bugs and update difficulties found using the Adobe Extension Manager we don't provide the API in <strong>mxp</strong> format anymore.
+	<br><br>
+	The Flash/Flex API are now distributed as source files that you can store in your preferred directory on your local disk. <br>
+	In order to add them to your projects simply follow the instructions below:
+</p>
+
+<p>In order to use the Actionscript (2.0 and 3.0) <strong>Flash API</strong> you simply have to point the <a target="_blank" href="http://livedocs.adobe.com/flash/mx2004/main_7_2/00001075.html" title="Flash MX 2004 -- Understanding the classpath">classpath</a> of your project to one of following directories:
+<ul>
+	<li>{your-path-to-smartfox}/Flash/Actionscript 2.0/</li>
+	<li>{your-path-to-smartfox}/Flash/Actionscript 3.0/</li>
+</ul>
+depending on the language version you have decided to use.
+</p>
+
+<p class="subTitle">&raquo; Setting the classpath in Flash:</p>
+
+<p>&raquo; From the <strong>properties panel</strong> click the "<strong>Settings...</strong>" button.</p>
+<img src="images/step01.jpg" width="886" height="114" alt="Step01" class="imgBorder">
+<p>&raquo; A new dialogue window will open, click on "<strong>Settings...</strong>"</p>
+<img src="images/step02.jpg" width="426" height="627" alt="Step02" class="imgBorder">
+<p>&raquo; From this box click on the "<strong>target icon</strong>" to specify the location of your classes</p>
+<img src="images/step03.jpg" width="396" height="261" alt="Step03" class="imgBorder">
+<p>&raquo; Browse your local disk and point to the <strong>Actionscript 2.0</strong> or <strong>3.0</strong> folder</p>
+<img src="images/step04.jpg" width="411" height="467" alt="Step04" class="imgBorder">
+<p>&raquo; Click the <strong>OK button</strong> to close the various windows and apply the settings.</p>
+
+<hr width="99%" size="1" noshade>
+
+<p class="subTitle">&raquo; Setting the classpath in Flex Builder:</p>
+<p>&raquo; From the <strong>Navigator</strong> window right-click on your project main folder and choose "<strong>Properties</strong>".</p>
+<img src="images/flex_step_01.jpg" width="281" height="456" alt="Flex Step 01" class="imgBorder">
+<p>&raquo; From the properties panel select "<strong>Flex Build Path</strong>" and click the "<strong>Add Folder...</strong>" button</p>
+<img src="images/flex_step_02.jpg" width="635" height="540" alt="Flex Step 02" class="imgBorder">
+<p>&raquo; Browse your local file system and select the <strong>Actionscript 3.0</strong> API folder.</p>
+<img src="images/flex_step_03.jpg" width="411" height="467" alt="Flex Step 03" class="imgBorder">
+<p>&raquo; Click the <strong>OK button</strong> to close the various windows and apply the settings.</p>
+
+<p class="subTitle">&raquo; API documentation</p>
+<p>For more info about  the Flash Client API, please refer to <a href="../api/installing.htm">section
+   4.1</a>, and <a href="../api/overview.htm">section 4.2</a> of this documentation.<br>
+  <br>
+    <a href="#top">^top</a>
+</p>
+
+<hr width="99%" size="1" noshade>
+
+<!-- Version 1.5.0 and greater -->
+<p class="subTitle">Installing with earlier versions (pre 1.6.0)</p>
+<p>You will find the following packages in the <strong>Flash API/</strong> folder inside your server installation directory.</p>
+ <table  border="0" cellspacing="0" cellpadding="4">
+   <tr>
+     <td><strong>SmartFoxClient_AS2.mxp</strong></td>
+     <td>Extension for Flash MX 2004 / Flash 8 (AS 2.0)</td>
+   </tr>
+   <tr>
+     <td><strong>SmartFoxClient_AS3.swc</strong></td>
+     <td>SWC library for Flash CS3 / Flex Builder 2 </td>
+   </tr>
+ </table>
+ <p><strong>&raquo; Installing under Flash MX2004 and Flash 8</strong></p>
+ <p>Double click the provided <strong>.mxp</strong> file, the Adobe Extension Manager should open:  follow the simple instructions on screen and restart Flash in order to use the newly installed extension. <br>
+   <a href="http://www.adobe.com/exchange/em_download/" target="_blank">Check this url</a> if you need to upgrade your Extension
+Manager.</p>
+ <p><strong>&raquo; Installing under Flex Builder 2</strong></p>
+ <p>All you need to do is adding the provided SWC to the build path of your new Flex project:
+ <ul>
+ <li>From the <strong>Project Panel</strong> (Navigator) right-click your project and choos <strong>Properties</strong>.</li>
+ <li>In the new window choose <strong>Flex Build Path</strong> from the left pane and click the <strong>Library Path</strong> tab.</li>
+ <li>Finally choose <strong>Add SWC</strong> and point it to the SmartFoxClient_AS3.swc file on your local disk.</li>
+ </ul>
+ <p>&nbsp;</p>
+ <hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="../running/extManager.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right"><a href="overview.htm" class="navLinks"></a></td>
+  </tr>
+</table>
+
+</body>
+</html>

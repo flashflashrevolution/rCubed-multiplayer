@@ -1,0 +1,262 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+<!--
+.style5 {font-weight: bold}
+-->
+</style>
+</head>
+
+<body class="bodyStyle">
+ <p class="title"><span class="subTitle"><a name="top" id="93"></a></span>6.9 Java Extensions </p>
+<p>This article will guide you through the process of writing and compiling your own<strong> Java server side extensions</strong> for SmartFoxServer 1.4 or higher. <br>
+  All you need to get started is the<a href="http://java.sun.com/javase/downloads/index.jsp" target="_blank"> Sun JDK</a> (Java Development Kit), your favorite Java editor and, of course, SmartFoxsServer installed on your local machine. <br>
+  In this tutorial we will also guide you to setup the <a href="http://www.eclipse.org/" target="_blank">Eclipse</a> and <a href="http://www.netbeans.org/" target="_blank">NetBeans</a> IDE. (Integrated Development Environment)
+<p>This is the list of topics addressed in this article
+<ul>
+  <li><a href="#1">The basics</a></li>
+  <li><a href="#2">The extension base class</a></li>
+  <li><a href="#3">A simple extension </a></li>
+  <li><a href="#4">Extension examples</a></li>
+  <li><a href="#5">Dependencies</a></li>
+  <li><a href="#6">Compiling with javac</a></li>
+  <li><a href="#7">Setting up Eclipse</a></li>
+  <li><a href="#8">Setting up Netbeans</a></li>
+  <li><a href="#9">Deploying the extension</a></li>
+  <li><a href="#10">More resources</a></li>
+</ul>
+<p class="subTitle"><a name="1"></a>&raquo; The Basics</p>
+<p>If you are familiar with Java web application development you could think of server extensions as servlets managed by a container (SmartFoxServer) which passes client requests and fires events to your custom server code.In other words, a server side extension is a <strong>fully fledged Java application</strong> that responds to specifc server calls and can integrate with any other libraries and frameworks to perform its job (including database access, ORMs, webserver interaction, etc...)</p>
+<p>Similarly to the servlet methods <strong>doGet()</strong> and <strong>doPost()</strong>, an extension is expected to extend a base class and override two main methods called <strong>handleRequest()</strong> and <strong>handleInternalEvent()</strong>.<br>
+The former is responsible for dealing with any custom extension request sent by the client while the latter handles asynchronous events fired internally by the server. These events provide notifications about important changes happening in the server such as the removal of a room, the disconnection of a user etc...</p>
+<p>Server extensions can be plugged at two different levels, <strong>Zone level</strong> and<strong> Room level</strong>. If you are not familiar with this concept you should read the &quot;<strong>Extension Architecture</strong>&quot; document found at chapter <strong>6.2</strong> of the documentation.</p>
+<p><a href="#top">^top</a></p>
+<p><span class="subTitle"><a name="2" id="2"></a>&raquo; The extension base class and the overridable methods</span> 
+<p>Every Java Extension is expected to extend the <strong>AbstractExtension</strong> base class found in the<strong> it.gotoandplay.extensions.examples</strong> package. (You can consult the javadocs for further details)<br>
+  The following is a list of methods that your class should override:</p>
+<table  border="0" cellspacing="3" cellpadding="3">
+ <tr>
+     <td valign="top" nowrap="nowrap" bgcolor="#FF6600"><span class="style3">method signature </span></td>
+     <td bgcolor="#FF6600"><span class="style3">description</span></td>
+   </tr>
+   <tr>
+     <td valign="top" nowrap="nowrap" bgcolor="#f6f6f6">void <strong>init()</strong></td>
+     <td bgcolor="#f0f0f0">called as soon as the extension is activated</td>
+   </tr>
+   <tr>
+     <td valign="top" nowrap="nowrap" bgcolor="#FFFFE6"><span class="style5">void</span> <strong>destroy()</strong></td>
+     <td bgcolor="#FFFFE6">called when shutting down the extensions </td>
+   </tr>
+   <tr>
+     <td valign="top" nowrap="nowrap" bgcolor="#f6f6f6">void <strong>handleRequest(String cmd, ActionscriptObject ao, User u, int fromRoom)</strong></td>
+     <td bgcolor="#f0f0f0">handles a request in XML format </td>
+   </tr>
+   <tr>
+     <td valign="top" nowrap="nowrap" bgcolor="#FFFFE6">void <strong>handleRequest(String cmd, String params[], User u, int fromRoom)</strong></td>
+     <td bgcolor="#FFFFE6">handles a request in Raw format </td>
+   </tr>
+   <tr>
+     <td valign="top" nowrap="nowrap" bgcolor="#f6f6f6">void <strong>handleRequest(String cmd, JSONObject jso, User u, int fromRoom)</strong></td>
+     <td bgcolor="#f0f0f0">handles a request in JSON format (only for SmartFoxServer 1.5.0 or higher) </td>
+   </tr>
+   <tr>
+     <td valign="top" nowrap="nowrap" bgcolor="#FFFFE6">void <strong>handleInternalEvent(InternalEventObject ieo)</strong></td>
+     <td bgcolor="#FFFFE6">handles an internal server event </td>
+ </tr>
+	<tr>
+     <td valign="top" nowrap="nowrap" bgcolor="#eeffff">Object <strong>handleInternalRequest(Object o)</strong></td>
+     <td bgcolor="#eeffff">(optional) handles communications with other objects / extensions / servlets (Since SmartFoxServer 1.6)</td>
+   </tr>
+ </table>
+<p class="subTitle"><a href="#top">^top</a></p>
+<p class="subTitle"><a name="3" id="3"></a>&raquo; Simple extension code</p>
+<p>The following code example shows the implementation of a basic server extension:</p>
+<pre class="serverCode">
+import java.nio.channels.SocketChannel;
+import java.util.*;
+
+import it.gotoandplay.smartfoxserver.db.*;
+import it.gotoandplay.smartfoxserver.data.*;
+import it.gotoandplay.smartfoxserver.exceptions.*;
+import it.gotoandplay.smartfoxserver.extensions.*;
+import it.gotoandplay.smartfoxserver.lib.ActionscriptObject;
+import it.gotoandplay.smartfoxserver.events.InternalEventObject;
+
+import org.json.JSONObject; 
+
+public class ExtensionTemplate extends AbstractExtension
+{
+
+	public void init()
+	{
+		trace("Extension initialized");	
+	}
+
+	public void destroy()
+	{
+		trace("Extension destroyed");
+	}
+
+	public void handleRequest(String cmd, ActionscriptObject ao, User u, int fromRoom)
+	{
+		// Your code here, handles XML-based requests
+	}
+	
+	public void handleRequest(String cmd, JSONObject jso, User u, int fromRoom)
+	{
+		// Your code here, handles JSON-based requests
+	}
+	
+	public void handleRequest(String cmd, String params[], User u, int fromRoom)
+	{
+		// Your code here, handles String-based requests
+	}
+
+	public void handleInternalEvent(InternalEventObject ieo)
+	{
+		// Your code here, handles server events
+	}
+	
+	public void handleInternalRequest(Object param)
+	{
+		// (Optional) Your code here, handles an internal request
+	}
+	
+}
+</pre>
+<p><a href="#top">^top</a></p>
+<p><span class="subTitle"><a name="4" id="4"></a>&raquo; Java Extensions Examples</span></p>
+<p>Bundled with any installation of SmartFoxServer PRO you will find a number of extensions examples that you can study.<br>
+The examples sources are found in <strong>{your-sfs-installation-path}/Server/javaExtensions/</strong> folder, under the <strong>it.gotoandplay.smartfoxserver.extensions.examples </strong>package:</p>
+<ul>
+  <li><strong>SimpleExtension.java</strong>: a basic extension implementation</li>
+  <li><strong>SimpleDbExtension.java</strong>: the java version of the tutorial found at <a href="../tutorials_pro/03_dbExt/index.htm" target="_top">chapter 8.3</a></li>
+  <li><strong>SFSTris2.java</strong>: the java version of the game tutorial found at <a href="../tutorials_pro/08_sfsTrisPro/index.htm" target="_top">chapter 8.8</a></li>
+  <li><strong>PixelGame.java</strong>: the java version of the game tutorial found at <a href="../tutorials_pro/10_pixelGame/index.htm">chapter 8.10</a></li>
+  <li><strong>SocketFileLoader.java</strong>: the java version of the game tutorial found at <a href="../tutorials_pro/17_socketFileLoader/index.htm">chapter 8.17</a></li>
+</ul>
+<p><a href="#top">^top</a></p>
+<p class="subTitle"><a name="5" id="5"></a>&raquo; External libraries dependencies</p>
+<p>Compiling your Java extensions requires that you include a few references to provided <strong>.jar</strong> files in your <a href="http://en.wikipedia.org/wiki/Classpath_(Java)" target="_blank">classpath</a>.<br>
+All the necessary libraries are located in the  <strong>{your-sfs-installation-path}/Server/lib/</strong> folder.</p>
+<p>Depending on the SmartFoxServer version you are using, these are the libraries to inlcude:</p>
+<ul>
+  <li> <strong>version 1.6.x:</strong> Server/lib/<strong>jysfs.jar</strong>, Server/lib/<strong>json.jar</strong>, Server/lib/<strong>json-lib-2.1-jdk15.jar</strong> </li>
+  <li> <strong>version 1.5.x:</strong> Server/lib/<strong>jysfs.jar</strong> and Server/lib/<strong>json.jar</strong> </li>
+  <li> <strong>version 1.4.x: </strong>Server/<strong>smartfoxserver.jar</strong></li>
+</ul>
+<p><a href="#top">^top</a></p>
+<p class="subTitle"><a name="6" id="6"></a>&raquo; Compiling the extension using javac</p>
+<p>Supposing that your extension source is located in the Server/javaExtensions/ folder and you're using version 1.6.x, this is  what you should type in your shell/terminal window:</p>
+<pre class="code">javac -classpath &quot;../lib/jysfs.jar:../lib/json.jar:../lib/json-lib-2.1-jdk15.jar&quot; MyJavaExtension.java  </pre>
+<p><strong>NB:</strong> the classpath separator &quot;:&quot; (colon) is valid for all Linux/Unix (including MacOS X) operating systems. Under Windows you should use &quot;;&quot; (semicolon) </p>
+<p><a href="#top">^top</a></p>
+<p><span class="subTitle"><a name="7" id="7"></a>&raquo; Setting up the Eclipse IDE</span></p>
+ <p>Using a Jave IDE like <a href="http://www.eclipse.org/" target="_blank"></a> can boost your productivity thanks to code completion, code templates, automated project building and deployment and more.<br>
+   The following is a visual walkthrough that will guide you in the setup of the <a href="http://www.eclipse.org/" target="_blank">Eclipse IDE</a> and the creation of a SmartFoxServer extension.</p>
+<p>Assuming you already have installed Eclipse, let's go ahead and launche the IDE.<br>
+   Click on <strong>File</strong> &gt; <strong>New</strong> &gt; <strong>Project</strong> in order to create a new Java project: </p>
+ <p><img src="eclipse_walkthrough/step01.gif" alt="step01" width="454" height="484" class="imgBorder"></p>
+ <p>Select <strong>Java Project</strong> and click <strong>Next</strong> </p>
+ <p><img src="eclipse_walkthrough/step02.gif" alt="step20" width="500" height="500" class="imgBorder"></p>
+ <p>Give a name to the project (e.g. &quot;MyExtension&quot;) and in the &quot;Project layout&quot; make sure to select &quot;<strong>Create separate source and output folder</strong>&quot;.<br>
+   This will create two different directories for your source  and compiled files.<br>
+ Let's go ahead by clicking &quot;<strong>Next</strong>&quot; </p>
+ <p><img src="eclipse_walkthrough/step03.gif" alt="step03" width="500" height="599" class="imgBorder"></p>
+ <p>The <strong>Java Settings</strong> window contains a set of sub panels where you can configure all the details of your project. Click on the &quot;<strong>Libraries</strong>&quot; tab and on the &quot;<strong>Add External JARs...</strong>&quot; button. This will open a dialogue box where you can add additional libraries for your project.</p>
+ <p><img src="eclipse_walkthrough/step04.gif" alt="step4" width="500" height="599" class="imgBorder"></p>
+ <p>Navigate your file system and reach the SmartFoxServer installation folder. From there move to the <strong>Server/lib/</strong> directory and select both jysfs.jar and json.jar by holding the CTRL key (Windows/Linux) or Command key (Mac) .<br>
+   <br>
+   <em>(NB: if you're using SmartFoxServer prior to version 1.5 you only need to select Server/lib/smartfoxserver.jar)</em></p>
+ <p><img src="eclipse_walkthrough/step05.gif" alt="step5" width="563" height="419" class="imgBorder"></p>
+ <p>Click Finish to create the project and make sure your Package Explorer is open.<br>
+   (You can toggle it from <strong>Window</strong> &gt;<strong> Open perspective</strong> &gt; <strong>Java</strong>)<br>
+ We can now create our first class in the project which will be the main extension class:  right click the &quot;<strong>src</strong>&quot; folder and select <strong>New</strong> &gt; <strong>Class</strong> </p>
+ <p><img src="eclipse_walkthrough/step06.gif" alt="step6" width="514" height="613" class="imgBorder"></p>
+ <p>In the &quot;<strong>New Java Class</strong>&quot; dialogue box we specify the package name (&quot;<strong>test</strong>&quot;) and the class name (&quot;<strong>MyExtension</strong>&quot;) <br>
+ Go ahead and click &quot;<strong>Finish</strong>&quot; </p>
+ <p><img src="eclipse_walkthrough/step07.gif" alt="step7" width="495" height="599" class="imgBorder"></p>
+ <p>The class is now ready. You can write your code and take advantage of the powerful features of Eclipse.<br>
+   By default your class will be auto-compiled in the bin/ folder of your project each time you save the source. </p>
+ <p><img src="eclipse_walkthrough/step08.gif" alt="step8" class="imgBorder"></p>
+ <p><a href="#top">^top</a></p>
+ <p><span class="subTitle"><a name="8" id="8"></a>&raquo; Setting up the Netbeans IDE</span></p>
+ <p>The following is a visual walkthrough that will guide you in the setup of the <a href="http://www.netbeans.org/" target="_blank">NetBeans IDE</a> and the creation of a SmartFoxServer extension.<br>
+ Let's start with the creation of a new project. Select <strong>File</strong> &gt; <strong>New Project</strong>... from the main menu.</p>
+<p><img src="netbeans_walkthrough/nb1.gif" alt="step 1" class="imgBorder"></p>
+<p>In the dialog window that appears we choose <strong>Java</strong> from the Categories list and click on <strong>Java Application</strong> and click <strong>Next</strong></p>
+<p><img src="netbeans_walkthrough/nb2.gif" alt="step 2" class="imgBorder"></p>
+<p>In the next screen we specify the name of the Project and click <strong>Finish</strong> to conclude the operation.</p>
+<p><img src="netbeans_walkthrough/nb3.gif" alt="step 3" class="imgBorder"></p>
+<p>The project has been successfully created and it's now visible in the Project's tree.<br>
+  Click the project name to collapse the the main node, right-click the <strong>Libraries</strong> icon and click on <strong>Add JAR/Folder...</strong><br>
+</p>
+<p><img src="netbeans_walkthrough/nb4.gif" alt="step 4" class="imgBorder"></p>
+<p>Now we're going to specify the dependencies that should be reference by our project.<br>
+Navigate your local disk to <strong>{your-sfs-installation-path}/Server/lib/</strong> and multiple select the files as show in the picture below.<br>
+(You should keep the <strong>CTRL</strong> key pressed to select multiple files under Linux and Windows, use <strong>Command</strong> under MacOS X)</p>
+<p><img src="netbeans_walkthrough/nb5.gif" alt="step 5" class="imgBorder"></p>
+<p>Finally we can create the Extension class. Right-click on the package icon and select <strong>New</strong> &gt; <strong>Java Class</strong></p>
+<p><img src="netbeans_walkthrough/nb6.gif" alt="step 6" class="imgBorder"></p>
+<p>In the dialogue box type the name of the Extension class and click on <strong>Finish</strong> to close the wizard.</p>
+<p><img src="netbeans_walkthrough/nb7.gif" alt="step 7" class="imgBorder"></p>
+<p>The class should have been created and opened in the Java editor. You're now able to use the auto-complete features. In the picture below we make the class extend the it.gotoandplay.smartfoxserver.extensions.AbstractExtension class.</p>
+<p><img src="netbeans_walkthrough/nb8.gif" alt="step 8" class="imgBorder"></p>
+<p>Finally we get the the &quot;stub methods&quot; auto-created for us by the IDE by clicking the lamp icon on the left of the editor.</p>
+<p><img src="netbeans_walkthrough/nb9.gif" alt="step 9" class="imgBorder"></p>
+<p><a href="#top">^top</a></p>
+<p><span class="subTitle"><a name="9" id="9"></a>&raquo; Deploying the extension</span></p>
+<p>
+ There are a few options that you can choose for deploying your Java extension:<br>
+	<blockquote>
+	<p>
+	<strong>&raquo; SIMPLE: use the javaExtensions/ folder:</strong><br>
+	You can simply copy your classes (including the packages folder structure) to the <strong>javaExtensions/</strong> folder. This folder is already added to the standard server classpath so you don't need to add it yourself.<br> 
+	Your classes will be immediately available to the server, you just need to add an <strong>&lt;extension/&gt;</strong> definition to your Zone in the config.xml file.	</p>
+
+    <p>
+	<strong>&raquo; ADVANCED: Point the server classpath to your class/jar files:</strong><br>
+	Another option is to create a .jar archive of your class files and copy it in one of the server folders.<br>
+	We suggest to always use the <strong>Server/javaExtensions/</strong> folder for your custom Java extensions and the <strong>Server/lib/</strong> folder for additional libraries.	</p>
+	<p>
+	Adding your .jar files to the classpath can be done in two different ways, depending on the way you're running the server:<br>
+		<blockquote>
+		<p>
+		<strong>Standalone:</strong><br>
+		just edit your start.bat (Windows) or start.sh (Linux / Unix / MacOS X)		</p>
+		<p>
+		<strong>Service / Deamon:</strong><br>
+		Open the <strong>wrapper.conf</strong> file inside the <strong>Server/conf/</strong> folder and add a new classpath entry. (Windows / Linux / Unix)<br>
+		<em>(This doesn't apply to MacOS X. Just use the "standalone" method.)</em>		  </p>
+        </blockquote>
+    </blockquote>
+    <p><a href="#top">^top</a></p>
+ <p class="subTitle"><a name="9" id="92"></a>&raquo; More resources</p>
+ <p>Where to go next?<br>
+ We  recommend to experiment with the <a href="#4">provided example extensions</a> and to inspect  the <a href="../javadoc/index.html" target="_blank">javadoc</a> which provides a reference to the server side classes.<br>
+ In particular the <strong>ExtensionHelper</strong> class which is the main entry point to the server side API.<br>
+ For further reference you can also check the introductory articles and the <a href="../tutorials_pro/Appendix/javaTemplate.htm">extension template</a> provided in this same section of the documentation.</p>
+ <p>Finally here follows a of list additional resources you might be interested into:</p>
+ <ul>
+   <li><a href="threadSafety.htm" target="_top">Extension threading model</a></li>
+   <li><a href="roomArchitecture.htm" target="_top">Application architecture</a></li>
+   <li><a href="../articles/build_mmo_p1.htm" target="_top">Building MMO virtual worlds</a></li>
+ </ul>
+ <p>&nbsp;</p>
+<hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="mailer.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

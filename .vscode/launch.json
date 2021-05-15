@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug SFS (Attach)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 8787
+        }
+    ]
+}

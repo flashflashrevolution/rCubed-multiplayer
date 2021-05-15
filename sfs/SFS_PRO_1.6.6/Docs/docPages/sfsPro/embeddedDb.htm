@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ 	
+	<!-- ::::::: INTRO ::::::: -->
+	<p class="title">6.12 Embedded Database Engine</p>
+ 	<p>
+		<strong>SmartFoxServer 1.6</strong> comes together with an embedded high-performance, ultra-light database engine called 
+		<a href="http://www.h2database.com/" title="H2 Database Engine" target="_blank">H2 Database Engine</a>.
+	</p>
+	<p>
+		The database server is fully <strong>JDBC compliant</strong>: it comes with its own <strong>JDBC driver</strong> and a convenient <strong>web-based administration tool</strong>.
+		In other words with SmartFoxServer 1.6 you don't have to worry about setting up and running a separate DB server like MySQL or MSSQL. <strong>The H2 engine is already configured 
+		and ready for use as soon as SFS is started.</strong>
+	</p>
+	<p>
+		The <strong>H2 engine</strong> is also useful for prototyping your applications, as you will be able to switch to any other JDBC production database, 
+		by simply changing a couple of settings in the main <strong>config.xml</strong> file.
+	</p>
+
+	<!-- ::::::: CREATING A NEW DATABASE ::::::: -->
+	<p class="subTitle">&raquo; Creating a new database</p>
+	<p>
+		In order to execute the <strong>H2 admin tool</strong> you should launch the <strong>adminDb</strong> script found in the <strong>Server/</strong> folder, while SmartFoxServer is running.
+		<br><br>
+		<strong>&raquo; Under Windows:</strong><br>
+		<blockquote style="border: 1px dotted #cc0000; padding:6px; background: #ffffee;">	
+			double click the <strong>adminDb.bat</strong> file in the <strong>Server/</strong> folder
+		</blockquote>
+		<br>
+		<strong>&raquo; Under Linux / Unix:</strong><br>
+		<blockquote style="border: 1px dotted #cc0000; padding:6px; background: #ffffee;">
+			from a terminal window run the adminDb.sh script by typing <strong>./adminDb.sh</strong>
+		</blockquote>
+	</p>
+	<p>This will start the admin tool and should launch a browser window that looks like this:</p>
+	<img src="images/dbAdmin.png" width="425" height="313" alt="DbAdmin">
+	<ul>
+		<li>If the browser window doesn't get launched automatically, you can do it manually and point it to this url ---&gt; <strong>http://localhost:8082/login.jsp</strong></li>
+		<li>If the form on screen is not filled like in the above picture, please copy the correct values from the image.</li>
+	</ul>
+	<p>
+		The most important part is the <strong>JDBC URL</strong>. In this case: <strong>jdbc:h2:tcp://localhost:9009/examples</strong><br>
+		Let's go through each part of the url and let's see what each bit means:
+		<ul>
+			<li><strong>jdbc:h2:tcp</strong> ---&gt; indicates the name of the driver and the connection mode, in this case TCP is used.</li>
+			<li><strong>localhost:9009</strong> ---&gt; this is the address of the H2 server and its TCP port. (should never change)</li>
+			<li><strong>examples</strong> ---&gt; this is the name of the database that we want to connect to.</li>
+		</ul>
+	</p>
+	<p>
+		<strong>If a database with the specified name already exists you will connect to it, otherwise a new database with that name will be created.</strong>
+	</p>
+	<p>
+		The <strong>examples</strong> database is provided with a demo table called &quot;retrocomputers&quot;. This is how the admin tool looks like when
+		connected to the demo table:
+	</p>
+	<img src="images/h2db.png" width="584" height="487" alt="H2db" class="imgBorder">
+	
+	<!-- ::::::: DATABASE SECURITY::::::: -->
+	<p class="subTitle">&raquo; Database security</p>
+	<p>
+		The <strong>H2 Database Engine</strong> is configured to run exclusively on the <strong>localhost</strong> using port <strong>9009</strong>.
+		Any other attempt to establish a connection from other ip addresses will be refused so the server is <strong>never exposed</strong> to the outside world. 
+	</p>
+	<p>
+		In the <strong>Server/</strong> folder you will find a <strong>datastore/</strong> directory where all the files used by <strong>H2</strong> are stored.
+		In case you need to migrate the database data to another SmartFoxServer instance you should also move that directory as well.
+	</p>
+	
+	<!-- ::::::: H2 DOCS ::::::: -->
+	<p class="subTitle">&raquo; H2 documentation and more...</p>
+	<p>
+		The <strong>H2 database engine</strong> comes with detailed documentation and user manual the can be consulted on <a href="http://www.h2database.com/" title="H2 Database Engine" target="_blank">the official website</a>.
+		We highly recommend to visit their site for further details about the SQL grammar, built-in functions and performance analysis.
+	</p>
+	<p>
+		Check also the <a href="../tutorials_pro/19_h2database/index.htm" id="" title="index">H2 database tutorial coming with source code.</a>
+	</p>
+<p>&nbsp;</p>
+
+<hr width="99%" size="1" noshade>
+<div align="center">
+	<a href="../../../index.htm" target="_top" class="navLinks">doc index </a>
+</div>
+
+</body>
+</html>

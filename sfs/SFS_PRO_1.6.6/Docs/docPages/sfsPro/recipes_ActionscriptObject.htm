@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+
+<body class="bodyStyle">
+ 	<p class="title"><span class="subTitle"><a name="top" id="93"></a></span>6.x Java Extensions CookBook </p>
+	<p>
+		This document provides quick snippets of code organized by theme that will get you started with most of the
+		server side coding tasks. Feel free to suggest more "<em>recipes</em>" by sending us an email or posting in our <a href="http://www.smartfoxserver.com/forums" target="_blank">support forums</a></a>
+	</p>
+	
+	<p class="subTitle">&raquo; Using ActionscriptObject</p>
+	<p>
+		The <strong>ActionscriptObject</strong> class provides an easy way to manipulate Actionscript data coming from the client as well as sending data from the server side.
+		You can learn about all the methods of this class in the <a href="http://www.smartfoxserver.com/docs/docPages/javadoc/it/gotoandplay/smartfoxserver/lib/ActionscriptObject.html">javadoc</a>. The followning is a selection of recipes to use ActionscriptObject.
+	</p>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+
+<p class="buttonTitle"><strong>Recipe #1:</strong></p>
+<p>The client sends an object containing a string and a number. The <em>sfs</em> object is a instance of the SmartFoxClient class and the three parmeters passed to the <em>sendXtMessage()</em> method are: the name of the extension, the <em>&quot;command&quot;</em> name and the parameters object.</p>
+<pre class="codeBlockClient">
+var obj:Object = {}
+obj.str = "Hello World!"
+obj.num = 54321
+
+sfs.sendXtMessage("test", "cmd", obj)
+</pre>
+
+<p>You will receive an ActionscriptObject: </p>
+		
+<pre class="codeBlockServer">
+public void handleRequest(String cmd, ActionscriptObject ao, User u, int fromRoom)
+{
+	String str = ao.getString("str");
+	int num = (int) ao.getNumber("num");
+}
+</pre>
+<p>Please note that numbers in ActionscriptObjects are typed as <em>double</em>, and you should cast them to other formats if you need it.</p>
+	
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #2:</strong></p>
+<p>A slightly more complex example showing how to deal with nested objects.
+This time we also have an array of numbers.</p>
+
+<pre class="codeBlockClient">
+var obj:Object = {}
+obj.str = "Hello World!"
+obj.num = 54321
+obj.arr = [1,2,3,4,5]
+
+sfs.sendXtMessage("test", "cmd", obj)
+</pre>
+
+<p>On the server side you will receive an ActionscriptObject instance, called ao:</p>
+<pre class="codeBlockServer">
+public void handleRequest(String cmd, ActionscriptObject ao, User u, int fromRoom)
+{
+	String str = ao.getString("str");
+	int num = (int) ao.getNumber("num");
+	ActionscriptObject arr = ao.getObj("arr");
+
+	// Cycle through all items
+	for (int i = 0; i &lt; arr.size(); i++)
+	{
+		System.out.println("Item " + i + " = " + arr.getNumber(i));
+	}
+}
+</pre>			
+</p>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+
+<p class="buttonTitle"><strong>Recipe #3:</strong></p>
+<p>
+	This example shows how to create an Actionscript object to send to the client. We want the client to receive an AS object like this:
+</p>
+
+<pre class="codeBlockClient">
+var obj:Object = {}
+obj.name = "King Arthur"
+obj.from = "Camelot"
+obj.age = 36
+obj.roundTable = true
+obj.inventory = {
+		weapons: ["knife", "sword", "long sword"],
+		food:["apple", "cheese", "bread", "wine"],
+		garments:["boots", "armor", "helmet"]
+		}
+</pre>
+
+<p>Here&#x27;s how we can create the object in Java:</p>
+<pre class="codeBlockServer">
+ActionscriptObject ao = new ActionscriptObject();
+ao.put("name", "King Arthur");
+ao.put("from", "Camelot");
+ao.putNumber("age", 36);
+ao.putBool("roundTable", true);
+
+// Create the inventory object 
+ActionscriptObject aoInventory = new ActionscriptObject();
+
+// Weapons array
+ActionscriptObject aoWeapons = new ActionscriptObject();
+aoWeapons.put(0, "knife");
+aoWeapons.put(1, "sword");
+aoWeapons.put(2, "long sword");
+
+// Food array
+ActionscriptObject aoFood = new ActionscriptObject();
+aoFood.put(0, "apple");
+aoFood.put(1, "cheese");
+aoFood.put(2, "bread");
+aoFood.put(3, "wine");
+
+// Garments array
+ActionscriptObject aoGarments = new ActionscriptObject();
+aoGarments.put(0, "boots");
+aoGarments.put(1, "armor");
+aoGarments.put(2, "helmet");
+
+// Add objects to inventory
+aoInventory.put("weapons", aoWeapons)
+aoInventory.put("food", aoFood)
+aoInventory.put("garments", aoGarments)
+
+// Add the invetory object to the main ActionscriptObject
+ao.put("inventory", aoInventory);
+</pre>			
+</p>
+	
+ <p>&nbsp;</p>
+<hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="mailer.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

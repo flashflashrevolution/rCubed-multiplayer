@@ -1,0 +1,17 @@
+*.log
+*.gif
+*.class
+!*$py.class
+
+jdk/
+lib/MultiplayerExtension.jar
+sfs/SFS_PRO_1.6.6/Server/lib/Lib/test
+sfs/SFS_PRO_1.6.6/Server/config
+sfs/SFS_PRO_1.6.6/Server/buddyLists
+sfs/SFS_PRO_1.6.6/Server/datastore
+
+config.production.xml
+licence.sfl
+logssmartfox_*
+
+

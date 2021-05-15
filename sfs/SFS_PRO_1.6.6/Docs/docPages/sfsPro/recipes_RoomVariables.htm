@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ 	<p class="title"><span class="subTitle"><a name="top" id="93"></a></span>6.x Java Extensions CookBook </p>
+	<p>
+		This document provides quick snippets of code organized by theme that will get you started with most of the
+		server side coding tasks. Feel free to suggest more "<em>recipes</em>" by sending us an email or posting in our <a href="http://www.smartfoxserver.com/forums" target="_blank">support forums</a></a>
+	</p>
+
+<p class="subTitle">&raquo; Room Variables Recipes</p>
+<p>
+	Room Variables can be accessed from server side to easily propagate Room-related values across the users in the same room. This is typically used to change state in games. 
+	The following recipes show a number of common use cases and examples of usage. Throughout the documentation you can find many documents and examples using Room Variables extensively:
+	<ul>
+		<li><a href="http://www.smartfoxserver.com/docs/docPages/sfsPro/roomArchitecture.htm" target="_top">Application Architecture Overview</a></li>
+		<li><a href="http://www.smartfoxserver.com/docs/docPages/tutorials_basic/11_roomVars/index.htm" target="_top">Room Variables Example</a></li>
+		<li><a href="http://www.smartfoxserver.com/docs/docPages/tutorials_basic/08_boardGame_p1/index.htm" target="_top">SmartFoxTris Example</a></li>
+	</ul>
+</p>
+
+
+<p class="buttonTitle"><strong>Recipe #1:</strong></p>
+<p>
+	In this recipe we show how to create a few simple Room Variables upon user request. The first two variables are assigned to the requesting user, 
+	while the third is owned by the Server (owner == null). By also keeping it private we ensure that no other user will be able to overwrite that variable.
+</p>	
+<p>
+	The <strong>setRoomVariables</strong>() method takes the following parameters:
+	<ul>
+		<li><strong>room</strong>: the target room</li>
+		<li><strong>user</strong>: the user</li>
+		<li><strong>vars</strong>: the map of variables</li>
+		<li><strong>setOwnership:</strong>: if true set the ownership of the  variables (default = true)</li>
+		<li><strong>broadcastAll</strong>: if true sends an update to all clients in the target room (default = true)</li>
+	</ul>
+</p>	
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+Zone currentZone;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+}
+
+public void handleRequest(String cmd, ActionscriptObject asObj, User user, int fromRoom)
+{
+	if (cmd.equals("setVars"))
+	{
+		Room targetRoom = zone.getRoom(fromRoom);
+		
+		if (targetRoom != null)
+		{
+			// Prepare Room Variables
+			Map&lt;String, RoomVariable&gt; roomVariables = new HashMap&lt;String, RoomVariable&gt;();
+			roomVariables.put("minRank", new RoomVariable("200", RoomVariable.TYPE_NUMBER, user, true, false));
+			roomVariables.put("gameStarted", new RoomVariable("false", RoomVariable.TYPE_BOOLEAN, user, true, false));
+			roomVariables.put("roomDesc", new RoomVariable("This is a poker game room", RoomVariable.TYPE_STRING, null, true, true));
+			
+			helper.setRoomVariables(targetRoom, user, roomVariables, true, true)
+		}
+	}
+}	
+</pre>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #2:</strong></p>
+<p>
+	Continuing from the previous example in this recipe we show how to update one of the previously created Room Variable upon client request.
+	We also how to access variables from the Room object.
+</p>
+<p>
+	The <strong>setRoomVariable</strong>() method takes the following parameters:
+	<ul>
+		<li><strong>room</strong>: the target room</li>
+		<li><strong>user</strong>: the user</li>
+		<li><strong>varName</strong>: variable name</li>
+		<li><strong>varType:</strong>: variable type</li>
+		<li><strong>varValue</strong>: variable value</li>
+		<li><strong>isPrivate</strong>: sets the variable as private</li>
+		<li><strong>isPersistent</strong>: sets the variable as persistent </li>
+		<li><strong>setOwnership:</strong>: if true set the ownership of the  variables (default = true)</li>
+		<li><strong>broadcastAll</strong>: if true sends an update to all clients in the target room (default = true)</li>
+	</ul>
+</p>
+
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+Zone currentZone;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+}
+	
+public void handleRequest(String cmd, ActionscriptObject asObj, User user, int fromRoom)
+{
+	if (cmd.equals("updVar"))
+	{
+		Room targetRoom = zone.getRoom(fromRoom);
+		RoomVariable gameStartedVar = targetRoom.get("gameStarted");
+		
+		// We check the 'gameStarted' RoomVariable to see if it is set to true
+		if (gameStartedVar.getValue().equals("false"))
+			throw new IllegalStateException("You can't modify the request value until the game is started");
+		
+		String newValue = asObj.getString("newVal");
+		
+		// Set the new RoomVariable value
+		helper.setRoomVariable(targetRoom, user, "minRank", RoomVariable.TYPE_NUMBER, newValue, false, true, true, true);
+		
+	}
+}
+</pre>
+
+
+	
+ <p>&nbsp;</p>
+<hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="mailer.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

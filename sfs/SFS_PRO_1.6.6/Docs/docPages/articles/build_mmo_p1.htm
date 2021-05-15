@@ -1,0 +1,919 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<title>SmartFoxServer: Flash based MMO Communities</title>
+		<script language="javascript" src="../../lib.js"></script>
+		<link href="../../main.css" rel="stylesheet" type="text/css">
+		
+		<style type="text/css" media="screen">
+			.sideNoteTitle
+			{
+				font-size: 120%;
+				font-weight: bold;
+				color: #888;
+			}
+			.sideNote
+			{
+				font: 110% Georgia, Verdana, Arial;
+				line-height: 19px;
+				margin: 20px;
+				padding: 10px;
+				background-color: #f6f6f6;
+				border: 2px dashed #CCC;
+				color: #333;
+			}
+		</style>
+	</head>
+
+<body class="bodyStyle">
+	 <p class="title">Building MMO Virtual Worlds</p>
+	 <p>
+	 	In this article we are going to discuss the architecture of a <strong>MMO(*) Virtual World </strong> 
+		featuring the typical community tools (avatar chat, buddy lists, shop, games, trading tools, etc...) 
+		found in applications of this genre. (Habbo Hotel, Mokitown, Club Penguin...)
+	 </p>
+	<p>
+		We will take an in-depth look at both the <strong>client</strong> (Flash / Flex) and <strong>server</strong> (SmartFoxServer) sides of the project and we'll discuss the best approaches to make the application easily extendable and manageable.  
+	</p>
+	<p style="font-size:90%">
+		(*) = Massive Multiplayer Online (Game / Community / RPG)<br>
+		There are literally dozens of acronyms that define the various genres of MMOs (MMOG, MMOC, MMORPG, MMOFPS...). <a href="http://en.wikipedia.org/wiki/Massively_multiplayer_online_game" target="_blank">Check Wikipedia if you're curious.</a> 
+	</p>
+	<p>&nbsp;</p>
+	
+	
+	<!-- 1 :: BACKGROUND :: -->
+	<p class="subTitle">&raquo; A little background</p>
+	<p>
+		<div align="right" style="float:right;">
+			<img src="images/habbo1.gif" alt="habbo hotel" class="imgBorder"><br><br>
+			<img src="images/habbo2.gif" alt="habbo hotel" class="imgBorder">
+		</div>
+		
+		In the past 2-3 years we've seen a conspicuous growth of Flash-based MMO Communities inspired by popular websites like <a href="http://www.habbo.com/" target="_blank">Habbo Hotel</a>, <a href="http://www.mokitown.com" target="_blank">Mokitown</a> and similar virtual worlds.<br>
+		The idea behind these applications is to create a highly interactive world where users can not only meet 
+		and chat together, but also create their own customizable "spaces" (rooms, apartments, houses), play online games (both single and multi player), publish and exchange pictures and a lot more.
+		</p>
+		
+		<p>
+			In the early days MMO communities were essentially based on "thick clients" (platform dependent executables, usually for Windows only) that users had to download to their local drives, install and run.
+		</p>
+		<p>
+			At the beginning of 2000 various startups were experimenting with technologies like <a href="http://en.wikipedia.org/wiki/Java_%28programming_language%29" target="_blank">Java</a> and <a href="http://en.wikipedia.org/wiki/Adobe_Shockwave" target="_blank">Shockwave</a> to create
+			similar applications and run them in a browser, making it possible to reach a wider audience and reducing the
+			software dependencies to a single browser plugin. <br>
+			Among those first experiments there were <em>DeviousMUD</em> which was later renamed <a href="http://en.wikipedia.org/wiki/RuneScape" target="_blank">RunEscape</a> and <a href="http://en.wikipedia.org/wiki/Habbo" target="_blank">Habbo Hotel</a>.
+		</p>
+		
+		<p>
+			Both MMOGs quickly became extremely popular, with millions of registered users from all over the world.<br>
+			That experience inspired many other companies
+			to research and experiment with similar technologies, including the emerging Macromedia Flash (today <a href="http://it.wikipedia.org/wiki/Adobe_Flash" target="_blank">Adobe Flash</a>).  
+		</p>
+		<p>
+			Back in 2001-2002 Flash was rapidly gaining popularity but it was missing the same rendering power of its
+			competitors (those were the days of Flash 5 and Flash MX). Additionally Shockwave had a dedicated server technology
+			provided by Macromedia (Shockwave Multiuser Server) which helped simplifying the development and deployment of online
+			MMOGs.
+		</p>
+		
+		<p> 
+			In just a few years things have evolved very quickly and
+			today Flash is the leading platform for any type of browser-based applications and games, including MMOGs.
+			The rendering speed has improved dramatically with the release of version 9 of the Flash Player 
+			and the Actionscript 3.0 languages provides a rock-solid platform for building any type of object oriented code.
+		</p>
+		<p>
+			As of today (February 2009) the latest Flash Player (version 10) is available for all 3 major operating systems 
+			(Windows, MacOS X and Linux-x86) providing a re-written virtual machine with
+			new features like JIT compiling, support for binary sockets, advanced display programming framework and video support.
+		</p>
+		<p>&nbsp;</p>
+		
+		
+		<!-- 2 :: THE IDEA :: -->
+		<p class="subTitle">&raquo; The idea: VirtuaPark</p>
+		
+		<p>
+			In order to illustrate the architecture behind a similar application we will analyze the design of 
+			 "<strong>VirtuaPark</strong>", a fictional community-driven MMO with customizable avatars interacting 
+			in 3D like environments (isometric), online and offline messaging system, 
+			shopping system and various multi-player games where users can challenge each others.	
+		</p>
+		
+		<p>
+			One of the crucial requirements for <strong>VirtuaPark</strong> is extensibility: we would like the project to be
+			open to new features (new modules, games etc...) without major hassles, so that new components can be easily plugged
+			to the existing code base. 
+		</p>
+		
+		<p>
+			The application will be 100% browser based, using the latest <strong>Flash Player</strong>. <br>
+			Behind the scenes <strong>SmartFoxServer PRO</strong> and a <strong>MySQL</strong> database will do the hard work to keep everyone 
+			online and synchronized while interacting, chatting, playing etc...
+		</p>
+		
+		<p>
+			The following diagram shows how the application modules are organized:
+		</p>
+		<p align="center">
+			<img src="images/app_overview.png" alt="Application Overview">
+		</p>
+		<p>
+			We have defined four main "modules" that will allow the user to access all the available features:
+		</p>
+		<ul>
+			<li>
+				<strong>Main Menu</strong>. It presents a list of all the "tools" and "games" available.
+				By clicking one of these items the tool/game will be launched.
+			</li>
+			
+			<li>
+				<strong>Control Panel</strong>. A tabbed pane with the following controls: 
+				<ul>
+					<li>Chat History (the transcript of all chat messages)</li> 
+					<li>Room List (the list of rooms/locations available)</li>
+					<li>User List (the list of users available in the current location)</li>
+					<li>My buddies (a list of buddies with their online/offline status)</li>
+				</ul>
+			</li>
+			
+			<li>
+				<strong>Chat Message Bar</strong>. A simple control bar where users can type their chat messages 
+				with tools for customizing the text and adding smilies 
+			</li>
+			
+			<li>
+				<strong>Avatar Chat</strong>. The most important area of the application, 
+				where the avatar chat and multiplayer games will be running. The Avatar Chat will feature a scrollable isometric view in the style of Habbo and the like. When a game is launched the chat will be hidden and the game will take its place.
+			</li>
+		</ul>
+		
+		<p>
+			Each module in the application will be responsible for handling one specific task 
+			(avatar customization, game, user list etc...) and it will be able to send and receive events from the others.
+			To give you an idea of the communication between modules check this example:
+			<ol>
+				<li>the user clicks on <strong>Customize Avatar</strong> in the Main Menu</li>
+				<li>the tool is loaded and launched in a new window inside the application</li>
+				<li>the user modifies the look of his character and commits the change</li>
+				<li>the tool sends a request to <strong>SmartFoxServer</strong> which in turn stores the new profile in the database and fires an event 
+				back to the Avatar Chat module so that everyone gets updated.</li>
+			</ol>
+		</p>
+		
+		<div class="sideNote">
+			<p class="sideNoteTitle">Side Note:</p>
+			<p>
+				Creating a tile-based isometric engine for an Avatar Chat is not trivial and it may take several months of hard work to build it and integrate it with the server. Additionally a level-editor is usually needed to build the chat locations, adding more hours of development.<br>
+				Because of this we have invested over 15 months of research and development to create a <strong>powerful and flexible Avatar Chat engine</strong> which integrates with <strong>SmartFoxServer out of the box</strong>. <br><br>
+				The product is called <a href="http://www.openspace-engine.com/" target="_blank" title="OpenSpace: Isometric Engine for multiplayer virtual worlds and MMOs">OpenSpace</a> and we suggest to take a look at the website and download the trial
+				as it could save your development costs and time by different orders of magnitude.
+			</p>
+		</div>
+		<p>&nbsp;</p>
+		
+		
+		<!-- 3 :: THE SHELL :: -->
+		<p class="subTitle">&raquo; Shell-based application</p>
+		
+		<p>
+			It is time to dive into the architecture of the MMO and we'll do it (oddly enough) by starting on the client side. 
+			In order to make all the application modules work together in a seamless way we need a <strong>special module</strong> that acts as a <strong>glue</strong> for all the others.
+			This special module will be called the "Shell" and it is represented in the following diagram: 
+		</p>
+		
+		<p align="center">
+			<img src="images/app_shell.png" alt="Application Shell">
+		</p>
+		<p>
+			The <strong>Shell Module</strong> will have a lot of responsibilities:
+			<ul>
+				<li>
+					<strong>Configuration</strong>. It will load the application main configuration file and it will make it available to all other modules.
+				</li>
+				<li>
+					<strong>Module loading/unloading</strong>. It will load and activate the other modules when the application is started, launch additional tools and unload those that are not needed anymore.
+				</li>
+				<li>
+					<strong>Connection sharing</strong>. The shell will be responsible for connecting to the socket server and share  the connection among all the other components. Each module will be then responsible for registering to the events that they need to listen to.
+					
+				</li>
+				<li>
+					<strong>UI management</strong>. It will manage dialogue boxes and error messages that come from the server and that should be displayed on top of all the other modules. It may also activate/deactivate modules in case an important message or an error should stop the interaction with the application. 
+				</li>
+				<li>
+					<strong>Multi-language support</strong>. The shell will dynamically load external language data from a database or XML file and populate all the GUI components (labels, buttons, lists, forms etc...) accordingly. This way we can also handle localized help pages, error messages and even currencies. 
+				</li>
+			</ul>
+		</p>
+		<p>
+			In order to develop the <strong>Shell and its modules</strong> you will have a good range of choices since <strong>SmartFoxServer</strong> supports both Actionscript 2.0 (from Flash 6 to 8) and Actionscript 3.0 (Flash Player 9, using Flash CS3 and Flex Builder 2).<br>
+			If you are planning to use AS 2.0 we would also recommend to check the <a href="http://www.smartfoxserver.com/bits/" target="_blank">SmartFoxBits</a>, a complete set of UI components that can dramatically speed up the process of creating Lobbies, Chat applications etc...
+		</p>
+		<p>&nbsp;</p>
+		
+		
+		<!-- 4 :: THE SERVER SIDE ARCHITECTURE :: -->
+		<p class="subTitle">&raquo; Server side architecture</p>
+		<p>
+			Now that we have defined the structure of the client side part, you are probably wondering what is going to happen
+			on the server side: how will you handle the many possible requests, 
+			how are you going to manage assets, persistence etc...<br> 
+			Before we jump into the technical details of the server side extension, it would be better if we examine the components that we will use on the backend.
+			<p>
+				Again a <strong>diagram</strong> is probably worth a hundred words: 
+			</p> 
+		</p>
+		<p align="center">
+			<img src="images/server_arch.png" alt="Server side architecture">
+		</p>
+		<p>
+			Starting from low to top we have the <strong>client</strong> who connects through his browser to our <strong>VirtuaPark</strong> website.
+			The website together with all the swf files and other assets can be comfortably handled by the <a href="http://www.mortbay.org/" target="_blank">Jetty web server</a> embedded in <strong>SmartFoxServer</strong>. 
+		<br>
+		With the embedded server you can easily serve static contents and create dynamic web pages 
+		using regular <strong>Java/JSP servlets</strong> or with the help of an integrated <strong>Python</strong> interpreter, 
+		to speed up the process.
+		</p>
+		<p>
+			The <strong>Server Side Extension</strong> will handle all the requests coming from each module, avatar chat and games plus it will
+			access the database server to store and retrieve the user data, application status and whatnot.
+			<br>
+			In this particular scenario an <a href="http://en.wikipedia.org/wiki/Object-relational_mapping" target="_blank">ORM tool</a> is highly recommended to help simplifying the access to the persistent data and make your server coding easier. <a href="http://www.hibernate.org/" target="_blank">Hibernate</a> and <a href="http://ibatis.apache.org/" target="_blank">IBatis</a> are probably the most popular in the world of Java, but <a href="http://javatoolbox.com/categories/object-relational-mappers" target="_blank">there are many others</a> that you can check.
+		</p>
+		<p>
+			Another important aspect of ORM tools is that they provide a <u>layer of abstraction between your application logic
+			and the actual database server</u>, making your Extension code independent from the DB technology. If for any reason 
+			you need to migrate from a database technology to another one it will be very simple to perform the switch and your
+			code won't be affected.
+		</p>
+		<p>
+			<strong>SmartFoxServer</strong> allows developers to easily integrate such tools with both Java extensions and script extensions (Actionscript and Python). If you plan to use the latter you'll be able to <strong>directly access all the ORM objects</strong> from your scripts <u>without the need of writing additional Java code</u>. 
+		</p>
+		
+		<p>
+			To give you an idea of how powerful is the mix of <strong>scripting languages</strong> (Python in this case) with an ORM like <strong>Hibernate</strong> here's a snippet of code that shows a simple login method that retrieves a user from the database and access a few of its properties:
+		</p>
+		
+		<div class="python">
+	<ol>
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				session = HibernateFactory.<span style="color: black;">openSession</span><span style="color: black;">(</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				tx = session.<span style="color: black;">beginTransaction</span><span style="color: black;">(</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				q = session.<span style="color: black;">createQuery</span><span style="color: black;">(</span><span style="color: #483d8b;">"from Users where nick = :nick and pass = :pass"</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				q.<span style="color: black;">setParameter</span><span style="color: black;">(</span><span style="color: #483d8b;">"nick"</span>, nick<span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				q.<span style="color: black;">setParameter</span><span style="color: black;">(</span><span style="color: #483d8b;">"pass"</span>, <span style="color: #dc143c;">pwd</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				res = q.<span style="color: #008000;">list</span><span style="color: black;">(</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #808080; font-style: italic;"># If the record was found...</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #ff7700;font-weight:bold;">if</span> res.<span style="color: black;">size</span><span style="color: black;">(</span><span style="color: black;">)</span> &gt;= <span style="color: #ff4500;">1</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #808080; font-style: italic;"># Get the record</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #dc143c;">user</span> = res.<span style="color: black;">get</span><span style="color: black;">(</span><span style="color: #ff4500;">0</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #008000;">type</span> = <span style="color: #dc143c;">user</span>.<span style="color: black;">getMemberType</span><span style="color: black;">(</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; gender = <span style="color: #dc143c;">user</span>.<span style="color: black;">getGender</span><span style="color: black;">(</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; ...
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; ...
+			</div>
+		</li>
+	</ol>
+</div>
+
+		
+		<p>
+			Hibernate allows you to query the objects in the database using a SQL-like language called HQL. As you can see instead of writing long SQL statements we just need to specify the criteria for our search. Once the object is retrieved we can access all its fields (including those that are mapped on linked tables) with simple getters and setters.<br>
+		</p>
+		<p>&nbsp;</p>
+		
+		
+		<!-- 5 :: SERVER SIDE EXTENSION :: -->
+		<p class="subTitle">&raquo; The Server Side Extension</p>
+		
+		<p>The Server Extension is the core of the application and probably the most complex part to build. 
+			As we have outlined in the previous diagrams we will run <strong>VirtuaPark</strong> in its own Zone 
+			and use a single extension plugged at <strong>Zone-level</strong>.
+		</p>
+		<p style="font-size:90%">
+			( If you're not familiar with the basics of the SmartFoxServer framework we would suggest you to pause the reading 
+			and review the articles found at <strong>Chapter 4</strong> of our <a href="http://www.smartfoxserver.com/docs/" target="_blank">documentation</a> ).
+		</p>
+		<p>
+			The first problem that we need to face when building the extension is how to organize the many requests that each client side module can send to the server.<br>
+			An efficient solution to our problem is organizing the Server Extension in modules as well, just like we did on the client, and make them handle the specific requests coming from each client side module. (Chat module, Shop module, Game module etc...)
+			
+		</p>
+		<p>The following is a visual representation of the solution:</p>
+		<p align="center">
+			<img src="images/ext_modules.png" alt="Extension Modules">
+		</p>
+		<p>
+			As you can see from the diagram, <strong>the main Extension file</strong> will <u>act as a dispatcher</u> 
+			for the other modules, which are essentially custom classes designed to handle the requests of the client modules.
+		</p>
+		<p>
+			In order for this mechanism to work we need to establish a naming convention between client and server
+			for the request names. As you may remember each Extension message sent and received by the server 
+			has a <strong>cmd</strong> property which identifies the command (request) name.
+		</p>
+		<p>
+			For our <strong>VirtuaPark</strong> we will be using the 
+			following convention: <br>
+		</p>
+		<p>
+			<blockquote><strong style="font-size:120%; color:#FF33CC">moduleName##requestName</strong></blockquote>
+		</p>
+		<p>
+			where:
+		</p>
+		<ul>
+			<li><strong>moduleName</strong>: is the name of the target module</li>
+			<li><strong>##</strong>: the separator</li>
+			<li><strong>requestName</strong>: the name of the request for the target module</li>
+		</ul>
+		<p>
+			Here are a few examples of requests based on the above convention:
+		</p>
+		<blockquote>
+			<strong>chat##moveAvatar</strong><br>
+			<strong>profile##storeData</strong><br>
+			<strong>shop##buyItem</strong><br>
+		</blockquote>
+		<p>
+			The following Python code example should clarify the whole process:
+		</p>
+		
+		<div class="python">
+	<ol>
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #ff7700;font-weight:bold;">class</span> ChatModule<span style="color: black;">(</span><span style="color: #008000;">object</span><span style="color: black;">)</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">def</span> handleReq<span style="color: black;">(</span><span style="color: #008000;">self</span>, <span style="color: #dc143c;">cmd</span>, params, who, roomId<span style="color: black;">)</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">print</span> <span style="color: #483d8b;">"Handling Chat Request: "</span>, <span style="color: #dc143c;">cmd</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #ff7700;font-weight:bold;">class</span> ShopModule<span style="color: black;">(</span><span style="color: #008000;">object</span><span style="color: black;">)</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">def</span> handleReq<span style="color: black;">(</span><span style="color: #008000;">self</span>, <span style="color: #dc143c;">cmd</span>, params, who, roomId<span style="color: black;">)</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">print</span> <span style="color: #483d8b;">"Handling Shop Request: "</span>, <span style="color: #dc143c;">cmd</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #ff7700;font-weight:bold;">class</span> GameModule<span style="color: black;">(</span><span style="color: #008000;">object</span><span style="color: black;">)</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">def</span> handleReq<span style="color: black;">(</span><span style="color: #008000;">self</span>, <span style="color: #dc143c;">cmd</span>, params, who, roomId<span style="color: black;">)</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">print</span> <span style="color: #483d8b;">"Handling Game Request: "</span>, <span style="color: #dc143c;">cmd</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				handlersTable = <span style="color: black;">{</span><span style="color: black;">}</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #ff7700;font-weight:bold;">def</span> init<span style="color: black;">(</span><span style="color: black;">)</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">global</span> handlersTable
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">print</span> <span style="color: #483d8b;">"Initializing"</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #808080; font-style: italic;"># Instantiate modules</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; chatModule = ChatModule<span style="color: black;">(</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; shopModule = ShopModule<span style="color: black;">(</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; gameModule = GameModule<span style="color: black;">(</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #808080; font-style: italic;"># Add modules to the handlers table</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; handlersTable<span style="color: black;">[</span><span style="color: #483d8b;">"chat"</span><span style="color: black;">]</span> = chatModule
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; handlersTable<span style="color: black;">[</span><span style="color: #483d8b;">"shop"</span><span style="color: black;">]</span> = shopModule
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; handlersTable<span style="color: black;">[</span><span style="color: #483d8b;">"game"</span><span style="color: black;">]</span> = gameModule
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #ff7700;font-weight:bold;">def</span> destroy<span style="color: black;">(</span><span style="color: black;">)</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">print</span> <span style="color: #483d8b;">"Stopping"</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #808080; font-style: italic;">#</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #808080; font-style: italic;"># Handle client requests</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #808080; font-style: italic;">#</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #ff7700;font-weight:bold;">def</span> handleRequest<span style="color: black;">(</span><span style="color: #dc143c;">cmd</span>, params, who, roomId, protocol<span style="color: black;">)</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; separatorPosition = <span style="color: #dc143c;">cmd</span>.<span style="color: black;">find</span><span style="color: black;">(</span><span style="color: #483d8b;">"##"</span><span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #808080; font-style: italic;"># Look for the separator</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">if</span> separatorPosition &gt; -<span style="color: #ff4500;">1</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; moduleName = <span style="color: #dc143c;">cmd</span><span style="color: black;">[</span><span style="color: #ff4500;">0</span>:separatorPosition<span style="color: black;">]</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; reqName = <span style="color: #dc143c;">cmd</span><span style="color: black;">[</span>separatorPosition + <span style="color: #ff4500;">2</span>:<span style="color: black;">]</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;"># Get the handler module and pass the request parameters</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">if</span> handlersTable.<span style="color: black;">has_key</span><span style="color: black;">(</span>moduleName<span style="color: black;">)</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; handler = handlersTable<span style="color: black;">[</span>moduleName<span style="color: black;">]</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; handler.<span style="color: black;">handleRequest</span><span style="color: black;">(</span>reqName, params, who, roomId<span style="color: black;">)</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">else</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">print</span> <span style="color: #483d8b;">"Unknown Module: "</span>, moduleName
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">else</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">print</span> <span style="color: #483d8b;">"Invalid request: "</span>, <span style="color: #dc143c;">cmd</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #808080; font-style: italic;">#</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #808080; font-style: italic;"># Handle server events</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #808080; font-style: italic;">#&nbsp; &nbsp;</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #ff7700;font-weight:bold;">def</span> handleInternalEvent<span style="color: black;">(</span>evt<span style="color: black;">)</span>:
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #ff7700;font-weight:bold;">pass</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp;&nbsp;
+			</div>
+		</li>
+	</ol>
+</div>
+
+<p>
+	We have defined 3 simple classes (ChatModule, ShopModule and GameModule) that represent the chat module, 
+	shop module and a game module respectively. Each class has a <strong>handleReq</strong> 
+	method that will be invoked by the main Extension file.
+</p>
+<p>
+	In the <strong>init()</strong> method of our Extension we instantiate all three classes and we add them 
+	to a global dictionary called
+	<strong>handlersTable</strong>. ( A dictionary in Python is the equivalent of an associative array / HashMap )
+</p>
+<p>
+	When a client request is received by the <strong>handleRequest()</strong> method we will do the following:
+	<ul>
+		<li>
+			Look for the <strong>##</strong> separator
+		</li>
+		<li>
+			Split the cmd string into the <strong>module name</strong> and <strong>request name</strong> 
+			(remember the convention we established?)
+		</li>
+		<li>
+			Check if the wanted module exists in the <strong>handlersTable</strong>
+		</li>
+		<li>
+			Finally dispatch the request to the module
+		</li>
+	</ul>
+</p>
+		
+<p>
+	If you prefer to use <strong>Java</strong> for your Extensions you should be able to re-create the same code 
+	structure by defining 
+	an interface that all module classes will implement.
+</p>
+
+<div class="java">
+	<ol>
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">interface</span> ModuleRequestHandler
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #66cc66;">{</span>
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #993333;">void</span> init<span style="color: #66cc66;">(</span><span style="color: #66cc66;">)</span>;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #993333;">void</span> destroy<span style="color: #66cc66;">(</span><span style="color: #66cc66;">)</span>;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #993333;">void</span> handleRequest<span style="color: #66cc66;">(</span><a href="http://www.google.com/search?q=allinurl%3AString+java.sun.com&amp;bntl=1"><span style="color: #aaaadd; font-weight: bold;">String</span></a> cmd, JSONObject params, User user, <span style="color: #993333;">int</span> roomId<span style="color: #66cc66;">)</span>;
+			</div>
+		</li>
+
+		<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;">
+			<div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">
+				<span style="color: #66cc66;">}</span>
+			</div>
+		</li>
+	</ol>
+</div>
+<p>&nbsp;</p>
+
+<!-- 6 :: 1st PART CONCLUSIONS :: -->
+<p class="subTitle">&raquo; Conclusions (Part 1)</p>
+<p>
+	Now that we have defined the general architecture of both client and server side you can see how the main goal of our
+	<strong>VirtuaPark</strong> design (extensibility) is successfully achieved. 
+	By using a modularized architecture on both sides of the application we will be able to easily add new features and games
+	to the virtual world.
+</p>
+<p>The 2nd part of this article will analyze the remaining parts of the puzzle and provide further advices for the development.</p>
+<p>&nbsp;</p>
+
+
+<hr />
+<p align="center"><a href="build_mmo_p2.htm">Proceed to part 2 of the article &raquo;</a></p>
+<hr />
+
+<p>&nbsp;</p>
+	
+</body>
+</html>

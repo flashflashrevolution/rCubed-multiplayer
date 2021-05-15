@@ -1,0 +1,285 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<title>SmartFoxServer: Flash based MMOG</title>
+		<script language="javascript" src="../../lib.js"></script>
+		<link href="../../main.css" rel="stylesheet" type="text/css">
+		
+		<style type="text/css" media="screen">
+			.sideNoteTitle
+			{
+				font-size: 120%;
+				font-weight: bold;
+				color: #888;
+			}
+			.sideNote
+			{
+				font: 110% Georgia, Verdana, Arial;
+				line-height: 19px;
+				margin: 20px;
+				padding: 10px;
+				background-color: #f6f6f6;
+				border: 2px dashed #CCC;
+				color: #333;
+			}
+		</style>
+	</head>
+
+<body class="bodyStyle">
+	 <p class="title">Building MMO Virtual Worlds (part 2)</p>
+	
+	
+	<!-- 1 :: SCALING THE VIRT. WORLD :: -->
+	<p class="subTitle">&raquo; Scaling the Virtual World</p>
+	<p>
+		One of the challenges in creating large multi-user virtual worlds is creating a scaleable server side infrastructure which allows the system
+		to keep up with the increasing traffic and popularity of the application. These projects usually start relatively small, offering free
+		memberships to users so they can evaluate it and decide if they want to become registered members. 
+		In this phase the number of concurrent users hitting the application typically ranges from a few hundreds to a few thousands,
+		so the investment in hardware resources is not particularly onerous: a couple of high-specced machines would handle the load without problems.
+	</p>
+	<p>
+		As soon as the word is spread and banner campaigns are launched, more and more users will sign up for both free and paid memberships and 
+		we may find out that the current hardware setup is lacking horse-power.
+	</p>
+	<p>
+		There are various options for building a scaleable backend, we're going to illustrate a couple of them highlighting the pros and cons of each solution:
+	</p>
+	<p>
+		<blockquote>
+			<strong>Clustering:</strong><br><br>
+			<em>&quot;A computer cluster is a group of tightly coupled computers that work together closely so that in many respects they can be viewed as though they are a single computer. The components of a cluster are commonly, but not always, connected to each other through fast local area networks. Clusters are usually deployed to improve performance and/or availability over that provided by a single computer, while typically being much more cost-effective than single computers of comparable speed or availability.&quot; </em> (from <a href="http://en.wikipedia.org/wiki/Computer_cluster" target="_blank">Wikipedia</a>)
+			<br><br>
+		 	
+			SmartFoxServer offers different options for running your applications on multiple servers:
+			
+			<ul>
+					<li>
+						You can run multiple server instances in parallel by splitting your virtual world into regions and have each of them handled by one or more machines. With this technique you can create large MMOs and gaming systems at a fraction of the cost of a "traditional" clustered system.<br><br>
+						The only drawback is that each server runs isolated from the others so if you need to share data across multiple instances you will have to use a central database which could become a bottleneck.
+					</li>
+					<br>
+					<li>
+							You can integrate <a href="http://www.terracotta.org" target="_blank">Terracotta</a> with you server side extensions to create a highly available and scalable service with no single-point-of-failure. In <strong>May 2008</strong> we officially released an <a href="http://www.smartfoxserver.com/clustering/" target="_blank" title="SmartFoxServer: Highly scalable multiplayer server clusters">in-depth white-paper</a> that illustrates how to create a <strong>SmartFoxServer cluster</strong> for large MMOs and on-line game systems. <br><br>
+							Terracotta is currently the leading technology for clustering the Java Virtual Machine, it operates behind the scenes at byte-code level, providing unprecedented scalability and fail-over resilience.<br><br>
+
+							From an economic standpoint the integration of Terracotta with <strong>SmartFoxServer</strong> makes it possible to create large distributed gaming systems at a fraction of the cost of traditional solutions (based on caches and expensive databases).
+							</li>
+
+				</ul>
+		
+		</blockquote>
+	</p>
+	
+	<p>
+		<blockquote>
+			<strong>Parallel instances:</strong><br><br>
+			An alternative to increase the scaleability of the socket server is to run <strong>multiple parallel instances</strong>.
+			By splitting the virtual world into <strong>regions</strong> we can make each instance handle one portion of the world and
+			share the common data in the clustered database server, which will be available to all regions.
+			<br><br>
+			
+			Using this technique, the load balancing is delegated to the client application: the client will either automatically
+			choose the right server based on the current traffic, or present a list of servers to the user allowing
+			him to choose the destination. 
+		</blockquote>
+	</p>
+	<p>
+		The following diagram illustrates the final server architecture of our fictitious <strong>VirtuaPark</strong> project:
+	</p>
+	<p align="center">
+		<img src="images/parallelism.png" alt="Server Architecture">
+	</p>
+	<p>
+		<ul>
+			<li>
+				<strong>Web Server</strong>: since most of the server side calls will be directed to the SmartFoxServer extension, 
+				including user registration, password recovery etc..., we will probably be able to handle all the web traffic with 
+				a single web server machine.
+				Additionally, in order to avoid a single point of failure, we may want to keep a spare mirror machine in case the 
+				web server goes down.<br><br>
+			</li>
+			<li>
+				<strong>SmartFoxServer</strong>: each instance will run on a high-spec dual-core, dual-CPU machine capable of handling
+				at least 8 - 14.000 users (this includes chats, instant messenger, multiplayer games, etc...) for a total of 40.000 or more
+				concurrent users.<br><br>
+			</li>
+			<li>
+				<strong>Database Server</strong>: the database will process the requests coming from all region instances.
+				For this reason we decided to use a clustered solution, in order to guarantee the best availability of the service. 
+			</li>
+		</ul>
+	</p>
+	<blockquote style="font-size:90%;">
+		( <a href="http://www.smartfoxserver.com/products/performance_faq.html" target="_blank">You can read more about performance and scalability in this f.a.q.</a> )
+	</blockquote>
+	<p>&nbsp;</p>
+	
+	
+	<!-- 2 :: SECURITY :: -->
+	<p class="subTitle">&raquo; Securing the Virtual World</p>
+	<p>
+		We've seen that <strong>MMOGs</strong> are <u>pretty complex applications</u> based on various server technologies, and for each of them we could write an entire book that delves into specific security concerns.
+		Since this article is centered around the <strong>SmartFoxServer</strong> technology we will take a look at some common sense techniques and best practices to reduce the amount of hacking to the minimum possible.
+		
+	</p>
+	<ul>
+		<li>
+			<strong>Basic security tools:</strong> SmartFoxServer comes with a basic set of security tools that can be configured to
+			avoid typical hacking attempts like connection and message flooding. To avoid these problems we provide anti-flood filters and an IP filter that prevents too many connections from a single IP address. Additionally the server is extremely paranoid with connected sockets that don't perform a login request. Such connections can't interact with the server and they are shut down after a configurable amount of time.<br><br>
+		</li>
+		<li>
+			
+			<strong>Server public requests:</strong> SmartFoxServer exposes a number of public commands that any client can invoke on the server, provided that they successfully logged in. Among these requests we have: login request, join request, public and private messages etc... All these public commands are heavily validated by the server to avoid malicious requests and they can be inhibited through the configuration file, to avoid unwanted requests. You can learn more about <a href="http://www.smartfoxserver.com/docs/docPages/sfsPro/framework_1.4.0.htm#zoneconf" target="_blank">disabling public requests here</a><br><br> 
+		</li>
+		<li>
+			<strong>Server side logic:</strong> it is vital that all the application logic is kept on the server side, as the Flash client can be easily reverse engineered and modified to perform malicious calls. Additionally you should be paranoid with every client request and heavily validate them, especially in prize-based games, transactions that involve money informations and similar ...<br><br>
+		</li>
+		<li>
+			<strong>Money / Prize transactions:</strong> if you run prize-based games (whether it's money, goods, services etc...) you will certainly attract the interest of hackers. In order to achieve the best security you should run your prize transactions between <strong>SmartFoxServer</strong> and an external <strong>SSL-enabled web server</strong>. This way the communications happens between the two servers, hidden from <em>indiscrete eyes</em> and through a highly secure protocol.<br><br>
+		</li>
+		<li>
+			<strong>Client side hardening:</strong> since SWF files are easily reverse engineered with a decompiler, it is crucial to make the life of the hacker-wannabe as hard as possible. There probably isn't a perfect solution for completely securing the client application, but you can achieve good-enough results by combining various techniques:<br><br>
+			
+			<ol>
+				<li>
+					Make your code modular and make it load different external pieces. 
+					Also try to obfuscate the file-name strings inside your swf files.<br><br>
+				</li>
+				<li>
+					If you are loading external XML data containing sensitive informations about other 
+					application resources, encrypt it.<br><br>
+				</li>
+				<li>
+					Use a code obfuscator: the decompiled source code will become extremely hard to read and understand.<br><br>
+				</li>
+				<li>
+					Use the cross-domain policy file to stop unwanted domains. If someone steals your client application and tries
+					to upload an hacked version on another website, the connection to your servers will be refused. <br><br>
+				</li>
+				<li>
+					With the latest Actionscript 3.0 you can transfer entire swf files as byte arrays through the socket. By doing so you will skip the browser cache and make it very hard to capture.<br><br>
+				</li>
+			</ol>
+			 
+		</li>
+	</ul>
+	<p>&nbsp;</p>
+	
+	
+	<!-- 3 :: TIPS :: -->
+	<p class="subTitle">&raquo; Development tips and tools</p>
+	<p>
+		Now that we have analyzed the client/server architecture, scalability and security concerns, we should finally be able to
+		put our hands on the keyboard and jump right into coding... 
+	</p>
+	<p>
+		Even if the temptation is strong we should hold on for a moment and discuss a few more aspects of the development that
+		we haven't mentioned so far. <strong>VirtuaPark</strong> will probably be a great success if we clearly have in mind what we 
+		want to achieve, and if we have set a number of realistic goals in terms of money, time and resource investments.
+	</p>
+	<p>
+		The following is a list of important aspects that should be taken into account before starting to develop our virtual world: 
+	</p>
+	
+	<ul>
+		<li>
+			<strong>Planning:</strong> as obvious as it may sound, a project like this requires careful planning. It is really advisable to write down one ore more documents that contains all the aspects of the application, the architecture overview, a list of features, the estimated resources needed and a small business plan.<br>
+			The document typically requires a number of reviews and, as you get more into the details, you will probably realize that the it won't be possible to pack all the features in the first release. You will probably need to <u>split the project in multiple development phases</u> so that you can set a realistic schedule for the initial release.<br>
+			Additionally, starting (relatively) small lowers the risks of failures because you can receive user feedback at an earlier stage and fix what is not working before it's too late.<br><br>
+		</li>
+		
+		<li>
+			<strong>Prototyping: </strong> creating quick-and-dirty prototypes is usually a great way to verify if an idea will work
+			as expected. When facing new challenges like those involved in the creation of an MMO, this is the best approach to avoid rewriting large pieces of code that were supposed to "just work".<br>
+			<strong>SmartFoxServer</strong> allows to quickly prototype server side code with highly productive scripting 
+			languages such as Actionscript and Python which can significantly cut down the development/prototyping times.
+			<br><br>
+		</li>
+		
+		<li>
+			<strong>Documentation:</strong> keeping documents that describe the application in all its aspects is essential to avoid
+			forgetting ideas that you have discussed and never put into writing. Additionally it makes it easier to instruct
+			new members of the team or to explain the project to people outside the company.<br>			
+			The same goes for both client side and server side code. Maintaining the habit of adding clear comments to the source
+			code will literally save hours of staring at the screen with no clue about where to start, and avoid tedious debugging
+			sessions.<br><br>
+		</li>
+		
+		<li>
+			<strong>Versioning:</strong> this is an essential tool when coding in a team. 
+			By keeping your code versioned you reduce the chances of loosing code, you get a central repository for the project files and you can let multiple developers work on the same files simultaneously. When everyone is finished coding they just need to submit their changes to the central repository. Modifications made by other team members will be merged automatically, and in case the same part of code was modified by another developer, you will be asked to resolve the conflicting code sections. If at any time a new piece of code breaks the application you can quickly roll back to the previous version without wasting precious time.<br> 
+			There are many commercial and free versioning tools available, we recommend starting from <a href="http://subversion.tigris.org/" target="_blank">SVN</a>, which is free and open-source. 
+		<br><br>
+		</li>
+		
+		<li>
+			<strong>Logging:</strong> debugging multi-user applications can sometimes be an horrible nightmare. In order to avoid long and frustrating debugging sessions, it's highly adivsable to log a lot of informations on both client and server sides. 
+			This will allow you to easily check what's going on on both ends of the application while testing.<br>
+			<strong>SmartFoxServer</strong> utilizes the JDK Logging API to output informations to the OS console and log files. 
+			The API are also accessible through the extensions, using any of the available languages 
+			(java, actionscript, python) <br><br>
+		</li>
+		
+		<li>
+			<strong>Beta phase:</strong> a limited public beta phase is essential to do the final testings.
+			Once the application has been sufficiently tested internally, it is time to publish it live 
+			and let a selected group of users play with it and report issues.
+			This can be done in various ways: by recruiting professional beta testers, by inviting selected users / gamers in signing up for beta access, by letting anyone register for a beta account without restrictions.<br> The important part of this phase is to receive as much feedback as possible from players, in order to seek and squash the final bugs. This also allows you to see how many resources are being used in a real-life environment and foresee what will happen when the application will reach a larger audience.
+		</li>
+		
+		
+	</ul>
+	<p>&nbsp;</p>
+	
+	<!-- 4 :: SHOWCASE :: -->
+	<p class="subTitle">&raquo; SmartFoxServer based MMOGs</p>
+	
+	<div style="float: right; margin-left: 10px; margin-right: 10px;">
+		<img src="images/ss_cpenguin.gif" class="imgBorder" alt="Club Penguin"><br><br>
+		<img src="images/ss_galaxseeds.jpg" class="imgBorder" alt="Galaxseeds">
+	</div>
+	<p>
+
+		<strong>SmartFoxServer</strong> powers some of the most creative and funny Flash-based communities and MMOGs around the web. 
+		You can check our <a href="http://www.smartfoxserver.com/products/showcase.php" target="_blank">Showcase Section</a> 
+		and learn more about each project.
+	</p>
+	
+	<p>
+		We'd like to mention Disney's <a href="http://www.clubpenguin.com" target="_blank">Club Penguin</a> (probably 
+		one the largest MMO ever created with Flash technology) which has become very popular in many countries all over the world.
+		The community offers a highly interactive environment with hundreds of customizable items and furniture, engaging games,
+		events and quests. 
+	</p>
+	<p>
+		<a href="http://www.galaxseeds.com/" target="_blank">Galaxseeds</a> is another great examples of an MMO with a unique science-fiction theme, games and tons of features. 
+	</p>
+	<p>
+		<a href="http://www.buildabearville.com/" target="_blank">Build-A-Bearvill</a> is an great children oriented MMO with educational quests and adventures. 
+	</p>
+	<p>
+		<a href="http://www.gogofrog.com/" target="_blank">Gogofrog</a> is an interesting experiment in social networking and MMOs that uses a real 3D engine optimized for Flash. The community allows users to create and customize their own "unlimited" spaces and share photos, music, documents...
+	</p>
+	<p>
+		<a href="http://www.yoville.com/" target="_blank">YoVille</a> is a colorful virtual world which integrates with Facebook and has more 150,000 daily active users.
+	</p>
+	<p>&nbsp;</p>
+	
+	<!-- 5 :: THAT'S ALL FOLKS! :: -->
+	<p class="subTitle">&raquo; Conclusions</p>
+	<p>This article just scratches the surface of one of the most exciting and complex type of multimedia software development, we hope it will serve as an appetizer for further investigation and learning. As usual feedback is always welcome. You can leave your comments in our <a href="http://www.smartfoxserver.com/forums/" target="_blank">SmartFoxServer forum</a>.</p>
+	<p>&nbsp;</p>
+	
+	<hr />
+	<p align="center"><a href="build_mmo_p1.htm">&laquo; Back to part 1 of the article</a></p>
+	<hr />
+	
+	
+
+<p>&nbsp;</p>
+	
+</body>
+</html>

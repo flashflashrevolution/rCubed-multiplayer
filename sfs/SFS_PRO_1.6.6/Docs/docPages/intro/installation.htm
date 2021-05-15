@@ -1,0 +1,281 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ <p class="title"><a name="top"></a>1.3 Requirements and installation </p>
+ <hr>
+	<span class="subTitle">&raquo;</span> <a href="#sys">System requirements</a><br>
+	<span class="subTitle">&raquo;</span> <a href="#win">Installing on Windows (NT/2000/XP/2003/Vista)</a> <br>
+	<span class="subTitle">&raquo;</span> <a href="#linux">Installing on Linux</a><br>
+	<span class="subTitle">&raquo;</span> <a href="#macosx">Installing on MacOS X (10.4 or higher)</a> <br>
+	<span class="subTitle">&raquo;</span> <a href="#unixes">Installing on other Unixes </a><br>
+	<span class="subTitle">&raquo;</span> <a href="#api">Installing the client Flash API</a><br>
+	<span class="subTitle">&raquo;</span> <a href="#64bit">64-bit Operating Systems support</a>
+<hr>
+ <p><span class="subTitle"><br>
+  <a name="sys"></a></span><span class="title">&raquo; System
+ requirements </span></p>
+ <p><strong>SmartFoxServer </strong>is a multi-platform application written in Java so, it can run on many different operating systems.</p>
+ <p>The minimum requirements to run the server are:</p>
+<p>- A 400Mhz cpu or better<br>
+   - At least 64Mb of RAM<br>
+   - 100Mb of hardisk space<br>
+   - An operating system capable of running the <strong>Sun Java Virtual Machine</strong> (JVM) like
+   Windows (98/NT/2000/XP), Linux, MacOS X (10.4 +), other Unix based OS(es)<br>
+ <p><strong>Reccomended basic hardware requirements:</strong></p>
+ <p>- 1Ghz or higher CPU<br>
+   - 512Mb RAM</p>
+ <p><strong>Recommended hardware requirements for high traffic applications and games:</strong></p>
+ <p>- Dual 2.0Ghz CPU or higher<br>
+   - 1Gb Ram<br>
+   - Server version of the Sun JVM (version 1.6.x recommended)
+</p>
+ 
+ <p>&nbsp;</p>
+ <a name="win"></a><span class="title">&raquo; Installing on Windows (NT/2K/XP/2003/Vista) </span>
+ <hr>
+<p>
+   Double click on the installer and follow the simple instructions on screen.
+<br>
+    When the process is finished you will find a new <strong>SmartFoxServer</strong> folder under
+  the <strong>Start &gt; Programs</strong> menu where you can launch the server and access
+     the other application folders.<br><br>
+	<img src="images/winInst.gif" width="408" height="212" alt="WinInst" class="imgBorder">
+     <br><br>
+     <strong>Installing SmartFoxServer as a Windows Service:</strong> <br>
+     From the Windows Start Menu open the <b>SmartFoxServer</b> folder and click
+     on the <strong>Install Service</strong> icon to install SmartFoxServer
+     as a windows service. Once this is done you will find it listed in the windows
+     services under the management console. <br>
+     <br>
+     You can now start/stop/restart the server following these steps:<br> 
+    <br>
+     1. Right-click <strong>My Computer</strong>, and choose <strong>Manage</strong>.<br>
+     2. Expand the <strong>Services &amp; Applications</strong> tab, and select Services.<br>
+   3. Select SmartFoxServer and use the control buttons or right click on it
+   to access the context menu. <br>
+   <br>
+In order to uninstall the server as a service just click the <strong>Uninstall
+Service</strong> icon from the Start &gt; Programs &gt; SmartFoxServer menu. <br>
+
+<p style="border: 1px dotted #cc0000; padding:6px; background: #ffffee;">
+	<strong style="color:#cc0000">NOTES for Windows Vista users:</strong>
+	<br><br>
+	Installing SmartFoxServer under the <strong>C:\Program Files\</strong> path will not allow you to modify the configuration and example files, as Windows requires
+	administrator privileges to modify any file under that path.
+	<br><br>
+	If you intend to open and edit the example files you will have to move them to a directory under your home folder to avoid problems with write privileges.
+	<br><br>
+	Our suggestion is to <strong>install the whole SmartFoxServer package</strong> under your home folder to avoid any of the aforementioned issues.
+</p>
+
+<br>
+<a href="#top">^top</a></p>
+ <p>&nbsp;</p>
+  <p><span class="subTitle"><a name="linux"></a></span><span class="title">&raquo; Installing
+  on Linux </span></p>
+  <hr>
+  <p>
+	Since version 1.5 <strong>SmartFoxServer</strong> comes with its own x86 32-bit Sun Java Runtime. <br>
+	( If you're running on a 64-bit OS you should jump to the related section before attempting to install. )
+	<br> 
+   <br>
+   Follow these steps to get started:<br>
+   <br>
+   1. 
+   open a terminal window and move
+   to the folder where you have downloaded the file.<br>
+   2. type &quot;gzip -d <em>filename</em>.tar.gz&quot; to extract the .tar file (where
+   &quot;filename&quot; is the name of the downloaded file) <br>
+   3. type &quot;tar xf <em>filename</em>.tar&quot; to extract the files.<br>
+   4. move inside the uncompressed folder and type <strong>./install</strong> <br>
+   <br>
+   Follow the simple instructions on screen and once you're done you can safely
+   delete the downloaded folder. <br>
+ To start the server move to the  {installation-directory}/Server folder and
+ type <strong>./sfs
+ start</strong><br>
+ <br>
+ The complete list of commands is the following:</p>
+  <table border="0" cellpadding="4">
+   <tr>
+     <td width="90" nowrap><strong>./sfs start </strong></td>
+     <td>Start the server </td>
+   </tr>
+   <tr>
+     <td><strong>./sfs stop </strong></td>
+     <td>Stop the server </td>
+   </tr>
+   <tr>
+     <td><strong>./sfs restart </strong></td>
+     <td>Restart the server </td>
+   </tr>
+   <tr>
+     <td><strong>./sfs status </strong></td>
+     <td>Show the current status of the server ( running / not running etc...
+     ) </td>
+   </tr>
+ </table>
+<p><strong>Installing SmartFoxServer as a Linux daemon:</strong><br>
+   In order to install SmartFoxServer as a daemon you will need root priviliges.<br>
+   <br>
+   The simplest method is to move to the /etc/rc<strong>X</strong>.d folder (where <strong>X</strong> is your current
+   runlevel)
+   <br>
+   From there type: <strong>ln -s 
+ path-to-your-script S99sfs</strong><br>
+ This will create a symbolic link to the start script in the rc<strong>X</strong>.d
+ folder.  On the next restart the server will be launched as daemon <br>
+ <br>
+ <strong>Example:</strong> (root privileges needed)<br> 
+ Suppose your runlevel is 5 (multiuser mode + GUI) <br>
+ <br>
+ 1. Move in the rc5.d folder: <strong>cd /etc/rc5.d </strong><br>
+ 2. Create a symbolic link to the start script :<strong> ln -s /home/john/SFS_PRO_1.3.0/Server/sfs
+ S99sfs <br>
+ </strong>(assuming your server was installed in /home/john)<br>
+ <br>
+The server will be started as a daemon on the next restart <br>
+<br>
+<a href="#top">^top</a></p>
+ <p>&nbsp;</p>
+<p><span class="subTitle"><a name="macosx" id="macosx"></a></span><span class="title">&raquo; Installing
+on MacOS X (10.4 or higher)</span> </p>
+ <hr>
+ <p> In order to install SmartFoxServer under <strong>MacOS X</strong> follow these steps:<br>
+ <ol>
+ 	<li>Double click the downloaded <strong>.dmg</strong> file</li>
+ 	<li>Drag and drop the content of the disk-image in a folder of your choice (e.g. the Applications folder)</li>
+ 	<li>Open the <strong>Server/</strong> folder and double click the <strong>SmartFoxServer</strong> icon.</li>
+ </ol>
+	<p>
+		You can also drag and drop the <strong>SmartFoxServer PRO</strong> icon to the <strong>dock</strong> in order to keep the application launcher at hand.
+	</p>
+	<img src="images/mac_sfs_dock.png" width="253" height="133" alt="Mac Sfs Dock" class="imgBorder">
+	<p>
+		An output window will appear showing the console output of the Server. 
+		You can shut down <strong>SmartFoxServer</strong> by simply pressing the <strong>Cancel</strong> button in the output window.
+	</p>
+	<p>
+		<img src="images/mac_sfs_output.png" width="507" height="413" alt="Mac Sfs Output" class="imgBorder">
+	</p>
+	
+
+	<p><strong>&raquo; Starting/Stopping SmartFoxServer from the MacOS X terminal:</strong></p>
+	<p>
+		In order to launch the server as a background process follow these simple steps:
+	</p>
+	<ol>
+		<li>Open a Terminal window (the Terminal is found under /Applications/Utility)</li>
+		<li>Change directory to your <strong>SmartFoxServer</strong> installation directory and go in the <strong>Server/</strong> folder</li>
+		<li>
+			Type: <strong>./sfs</strong> followed by any of these commands: <strong>start</strong>, <strong>stop</strong>, <strong>restart</strong> or <strong>console</strong>
+		</li>
+	</ol>
+ 	<p><strong>Example:</strong> ./sfs start</p>
+	<p><a href="#top">^top</a></p>
+ 
+	<p>&nbsp;</p>
+
+ <p><span class="subTitle"><a name="unixes" id="unixes"></a></span><span class="title">&raquo; Installing
+   on other Unix(es) </span></p>
+ <hr>
+ <p>SmartFoxServer supports other Unix-based operating systems like Free-BSD,
+   Solaris etc...<br>
+   You will need to download the<strong> Linux version of the server</strong> and follow these
+   steps:
+   <br>
+   <br>
+1. open a terminal window and move to the folder where you have downloaded the
+file.<br>
+2. type &quot;gunzip <em>filename</em>.tar.gz&quot; to extract the .tar file
+(where
+   &quot;filename&quot; is the name of the downloaded file) <br>
+3. type &quot;tar xf <em>filename</em>.tar&quot; to extract the files.<br>
+4. move to the extracted folder and launch the <strong>start.sh</strong> script
+inside the <strong>Server/</strong> directory by typing <strong>./start.sh </strong>
+ <br><br>
+The additional requirement is that you have a Sun Java Runtime 5 or higher installed in your OS .<br>
+Optionally you can safely remove the <strong>jre/</strong> folder, as it contains a Linux x-86 specific JRE which you may not use.
+</p>
+ <p><a href="#top">^top</a></p>
+ <p>&nbsp;</p>
+
+ <p class="title"><a name="api" id="api"></a>&raquo; Flash API installation</p>
+ <hr>
+To complete the setup you will need to install the <strong>SmartFoxServer
+   API</strong> extension
+   for <strong>Adobe</strong> <strong>Flash</strong>.<br>
+The extension will add new objects that you can use in Actionscript to interact
+with the server.
+<p>To install the API just open the <strong>Flash API/ </strong>folder in your SFS main directory and choose the appropriate version.</p>
+<blockquote style="border: 1px dotted #cc0000; padding:6px; background: #ffffee;">
+	<strong>SmartFoxServer 1.6.x note:</strong><br>
+	Due to the various bugs and update difficulties found using the Adobe Extension Manager we don't provide the API in <strong>mxp</strong> format anymore.
+	<br><br>
+	The Flash/Flex API are now distributed as source files that you can store in your preferred directory on your local disk. 
+	In order to add them to your projects you will simply have to point your application <strong>classpath</strong> to that directory.
+</blockquote>
+
+<p><span class="subTitle">&raquo; API documentation  </span></p>
+<p>For more info about  the Flash Client API, please refer to <a href="../api/installing.htm">section
+   4.1</a>, and <a href="../api/overview.htm">section 4.2</a> of this documentation.<br>
+  <br>
+    <a href="#top">^top</a></p>
+
+	<p class="title"><a name="64bit" id="64bit"></a>&raquo; 64-bit Operating Systems support</p>
+ 	<hr>
+	<p><strong>SmartFoxServer</strong> can be run on most 64-bit OS(es) available today, including 64 bit versions of <strong>Windows</strong>, <strong>Linux</strong> and <strong>MacOS X</strong></p>
+	<p>
+		The software comes bundled with the latest <strong>32-bit Sun Java Runtime Edition</strong>.
+		If you are running a <strong>64-bit</strong> operating system you should download the latest 64-bit version of the <a href="http://www.java.com" target="_blank">JRE from the Sun website</a>
+		and substitute the bundled SmartFoxServer <strong>jre/</strong> folder with the new version version.
+	</p>
+	<p><strong>MacOS X</strong> users should already have the right JRE version (32/64 bit) installed in the system.</p>
+	<p class="subTitle">&raquo; Using the native wrapper under a 64bit OS</p>
+	<p>
+		SmartFoxServer uses a third-party, open source JRE wrapper called <em><strong>Java Service Wrapper</strong></em> by <em>Tanuki Software</em>, to launch the application as server/daemon for Windows, Linux and MacOS.
+		Each distribution of the server comes with its own 32-bit version of the wrapper. If you are under a 64-bit OS the application will probably refuse to work and you will need replace it with the native 64-bit binary. 
+	</p>
+	<p>
+		At the time of writing (October 2008) there exist community versions for Linux(64) and MacOSX(64), while the Windows version is only commercial. 
+	</p>
+	<p>
+		To upgrade your wrapper follow these steps:
+		<ol>
+			<li>
+				Download one of the following packages:
+				<ul>
+					<li><a href="http://www.smartfoxserver.com/download/wrapper/wrapper_linux64.zip" >Linux 64bit wrapper</a></li>
+					<li<a href="http://www.smartfoxserver.com/download/wrapper/wrapper_macosx64.zip" >MacOSX (Universal) 64bit wrapper</a></li>
+				</ul>
+			</li>
+			<li>Extract the archive</li>
+			<li>Copy the extracted files to your <strong>path-to-smartfox/Server/lib/</strong> folder, with the exception of the <em><strong>wrapper</strong></em> executable file which goes in the <strong>path-to-smartfox/Server/</strong> folder</li>
+		</ol>
+	</p>
+	<p>
+		<a target="_blank" href="http://wrapper.tanukisoftware.org/doc/english/download.jsp" title="Java Service Wrapper - Download Java Service Wrapper">You can learn more at the Tanuki Wrapper website</a>
+	</p>
+	<p>
+		    <a href="#top">^top</a></p>
+	</p>
+
+<hr width="99%" size="1" noshade>
+<table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="features.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right"><a href="../config/basics.htm" class="navLinks"></a></td>
+  </tr>
+</table>
+
+</body>
+</html>

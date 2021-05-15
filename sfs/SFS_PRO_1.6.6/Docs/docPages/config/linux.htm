@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+	<p class="title">2.4 Linux file descriptors</p>
+	<p>
+		If you are using <strong>Linux</strong> (or other Unixes) as your server operating system you may experience a &quot;<strong>Too many open files</strong>&quot; error
+		when reaching around <strong>1000 simultaneous connections</strong>.
+	</p>
+	<p>
+		<strong>There is nothing to worry about:</strong> by default most Linux distributions are set to a maximum of <strong>1024</strong> file descriptors: each time you
+		open a file or a socket connection you use one these descriptors and when you reach the maximum you get the error mentioned above.
+	</p>
+	<p>
+		You can check the value currently set in your system by typing this command in a terminal window:
+	</p>
+<pre class="code">
+ulimit -n
+</pre>
+	<p>
+		The value returned by the command is the current limit of your OS for all open files and open socket connections.<br>
+		In order to raise this value you can use the same command followed by a new value.<br>
+	</p>
+	<p><strong>Example:</strong></p>
+<pre class="code">
+ulimit -n 20000
+</pre>
+
+ 	<p style="border: 1px dotted #cc0000; padding:6px; background: #ffffee;">
+		<strong>NOTE:</strong><br>
+		These settings are not global and they only last for the duration of the user
+		session. If you close the session or restart the server the file descriptor limit will go back to its defaults.
+		<br><br>
+		In order to keep the wanted values when running SmartFoxServer you should incorporate the ulimit command in the <strong>start.sh</strong> or <strong>sfs</strong> script
+	</p>
+	
+<p>&nbsp;</p>
+<p class="subTitle">&raquo; Fixing the descriptor limit in the launch scripts</p>
+<p>
+	The <strong>start.sh</strong> script is used to start the JVM and the Server directly. It's a one line script that looks like this:
+</p>
+<pre class="code">
+java -cp "./:./sfsExtensions/:lib/activation.jar:lib/commons-beanutils.jar...
+</pre>
+<p>All you have to do is simply add the ulimit line at the very top and save.</p>
+<pre class="code">
+<font color="red">ulimit -n 20000</font>
+java -cp "./:./sfsExtensions/:lib/activation.jar:lib/commons-beanutils.jar...
+</pre>
+
+<p>The <strong>sfs</strong> scripts launches the native wrapper and reponds to the <em>start</em>, <em>stop</em>, <em>console</em> and <em>restart</em> commands.</p>
+<p>Open the script with your favourite text editor and add the ulimit command in the <em><strong>start)</strong></em> section (Lines 182-183).</p>
+
+<pre class="code">
+	start() {
+	echo "Starting $APP_LONG_NAME..."
+	getpid
+	if [ "X$pid" = "X" ]
+    
+	etc...
+</pre>
+
+Change it to:
+
+<pre class="code">
+	start() {
+	<font color="red">ulimit -n 8192</font>
+	echo "Starting $APP_LONG_NAME..."
+	getpid
+	if [ "X$pid" = "X" ]
+</pre>
+<p>Save and you are ready to launch.</p>
+<p>&nbsp;</p>
+
+<hr width="99%" size="1" noshade>
+<div align="center">
+	<a href="../../../index.htm" target="_top" class="navLinks">doc index </a>
+</div>
+
+</body>
+</html>

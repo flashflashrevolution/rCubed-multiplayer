@@ -1,0 +1,40 @@
+2009/04/21 11:26:41.968 - [ INFO ] [id: 10] (SmartFoxServer.bootH2Engine): Starting h2 engine...
+2009/04/21 11:26:45.953 - [ INFO ] [id: 10] (DefaultBuddyListPersister.init): Default Buddy List Persister <INITED>
+2009/04/21 11:26:47.328 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ json ] created, for zone:simpleChat
+2009/04/21 11:26:47.359 - [ INFO ] [id: 10] (DefaultBuddyListPersister.init): Default Buddy List Persister <INITED>
+2009/04/21 11:26:48.109 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ dbTest ] created, for zone:dbZone
+2009/04/21 11:26:48.671 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ dbTestAdv ] created, for zone:dbZone
+2009/04/21 11:26:49.296 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ simpleExt ] created, for zone:dbZone
+2009/04/21 11:26:49.656 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ loginEx ] created, for zone:loginZone
+2009/04/21 11:26:50.031 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ slogin ] created, for zone:slogin
+2009/04/21 11:26:50.484 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ pixel ] created, for zone:pixel
+2009/04/21 11:26:50.828 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ Letters ] created, for zone:letters
+2009/04/21 11:26:50.890 - [ INFO ] [id: 10] (DefaultBuddyListPersister.init): Default Buddy List Persister <INITED>
+2009/04/21 11:26:51.015 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ smsg ] created, for zone:messenger
+2009/04/21 11:26:51.187 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ imgman ] created, for zone:imgMan
+2009/04/21 11:26:52.015 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ h2db_ext ] created, for zone:h2dbzone
+2009/04/21 11:26:52.125 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ loader ] created, for zone:sloader
+2009/04/21 11:26:52.125 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ __$RedBox$__ ] created, for zone:SmartVideoClipPlayer
+2009/04/21 11:26:52.265 - [ INFO ] [id: 10] (Logger.logInfo): [RedBox] RedBox's AVChatManager initialized
+2009/04/21 11:26:52.296 - [ INFO ] [id: 10] (Logger.logInfo): [RedBox] RedBox's AVClipManager initialized and a/v clips list created (4 clips found)
+2009/04/21 11:26:52.296 - [ INFO ] [id: 10] (Logger.logInfo): [RedBox] Extension initialized
+2009/04/21 11:26:52.296 - [ INFO ] [id: 10] (DefaultBuddyListPersister.init): Default Buddy List Persister <INITED>
+2009/04/21 11:26:52.296 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ smsg ] created, for zone:SmartMessengerAV
+2009/04/21 11:26:52.296 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ __$RedBox$__ ] created, for zone:SmartMessengerAV
+2009/04/21 11:26:52.312 - [ INFO ] [id: 10] (Logger.logInfo): [RedBox] RedBox's AVChatManager initialized
+2009/04/21 11:26:52.312 - [ INFO ] [id: 10] (Logger.logInfo): [RedBox] RedBox's AVClipManager initialized and a/v clips list created (0 clips found)
+2009/04/21 11:26:52.312 - [ INFO ] [id: 10] (Logger.logInfo): [RedBox] Extension initialized
+2009/04/21 11:26:52.312 - [ INFO ] [id: 10] (ExtensionHandler.createExtension): Zone Extension [ __$RedBox$__ ] created, for zone:SmartChatAV
+2009/04/21 11:26:52.312 - [ INFO ] [id: 10] (Logger.logInfo): [RedBox] RedBox's AVChatManager initialized
+2009/04/21 11:26:52.312 - [ INFO ] [id: 10] (Logger.logInfo): [RedBox] RedBox's AVClipManager initialized and a/v clips list created (0 clips found)
+2009/04/21 11:26:52.312 - [ INFO ] [id: 10] (Logger.logInfo): [RedBox] Extension initialized
+2009/04/21 11:26:52.546 - [ INFO ] [id: 10] (SmartFoxServer.setupTaskScheduler): [TaskScheduler] ... started ::
+2009/04/21 11:26:52.546 - [ INFO ] [id: 10] (SmartFoxServer.run): [BlueBoxHandler]... started :: 
+2009/04/21 11:26:52.546 - [ INFO ] [id: 10] (SmartFoxServer.run): [EventWriter] ..... started :: 1 thread(s)
+2009/04/21 11:26:52.546 - [ INFO ] [id: 10] (SmartFoxServer.run): [SystemHandler] ... started :: 1 thread(s)
+2009/04/21 11:26:52.546 - [ INFO ] [id: 10] (SmartFoxServer.run): [ExtensionHandler]. started :: 1 thread(s)
+2009/04/21 11:26:52.546 - [ INFO ] [id: 10] (SmartFoxServer.run): [DeadChannelsPolicy: strict]
+2009/04/21 11:26:52.546 - [ INFO ] [id: 10] (SmartFoxServer.run): Server is up and running!
+2009/04/21 11:26:52.562 - [ INFO ] [id: 11] (Logger.logInfo): [RedBox] Internal event received: serverReady
+2009/04/21 11:26:52.562 - [ INFO ] [id: 11] (Logger.logInfo): [RedBox] Internal event received: serverReady
+2009/04/21 11:26:52.562 - [ INFO ] [id: 11] (Logger.logInfo): [RedBox] Internal event received: serverReady

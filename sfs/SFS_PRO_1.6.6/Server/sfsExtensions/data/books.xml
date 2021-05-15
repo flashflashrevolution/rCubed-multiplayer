@@ -1,0 +1,40 @@
+<bookCollection>
+
+	<!-- Title and collection name -->
+	<collectionName>My Tech Book Collection</collectionName>
+	<collectionOwner>Lapo</collectionOwner>
+	
+	<!-- The list of books goes here -->
+	<bookList>
+		<book title="Head First Design Patterns"
+			author="Freeman, Freeman"
+			year="2004"
+			publisher="O'Reilly"
+		/>
+		
+		<book title="Thinking in Java"
+			author="B.Eckel"
+			year="2003"
+			publisher="Prentice Hall"
+		/>
+		
+		<book title="C++ From ground up"
+			author="H.Schildt"
+			year="2004"
+			publisher="McGraw-Hill Osborne Media"
+		/>
+		
+		<book title="Python in a Nutshell"
+			author="A.Martelli"
+			year="2003"
+			publisher="O'Reilly"
+		/>
+		
+		<book title="C# Cookbook"
+			author="Teilhet, Hilyard"
+			year="2003"
+			publisher="O'Reilly"
+		/>
+	</bookList>
+	
+</bookCollection>

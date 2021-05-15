@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>SmartFoxServer Documentation</title>
+<link href="../../../api.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="plain">
+ <p class="itemName">_server.removeBuddy()</p>
+ <p class="title">Availability:</p>
+ <p class="plain">SmartFoxServer PRO 1.6.0 </p>
+ <p class="title">Usage:</p>
+ <p class="plain">_server.removeBuddy(buddyName, user)</p>
+ <p class="title">Description:</p>
+<p class="plain">Removes a buddy from a user's buddy list.<br>
+  If <em>mutualRemoveBuddy</em> is activated both users will be removed to their respective buddy lists.
+</p>
+<p>
+	For a complete overview of the <strong>Buddy List 2.0</strong> system introduced in version 1.6 check <a href="../../sfsPro/buddyList2.htm" target="blank">this document.</a>
+</p>
+<p class="title">Properties:</p>
+ <table  border="0" cellspacing="0" cellpadding="3">
+   <tr>
+     <td valign="top" nowrap="nowrap">
+		<strong>buddyName</strong>
+	</td>
+     <td>&nbsp;</td>
+     <td>the name of the buddy to remove </td>
+   </tr>
+	<tr>
+     <td valign="top" nowrap="nowrap">
+		<strong>user</strong>
+	</td>
+     <td>&nbsp;</td>
+     <td>the user, owner of the buddy list</td>
+   </tr>
+ </table>
+ <p class="title">Returns:</p>
+ <p class="plain">nothing, it will fire and <strong>onBuddyList</strong> event on the client side.</p>
+ <p class="title">Example:</p>
+<pre class="code">
+// Removes a buddy called Mr.X from the "user" buddy list
+_server.removeBuddy(user, "Mr.X")
+</pre>
+<br /> 
+<p class="plain"><span class="title">See also:</span></p>
+ <p class="plain"><strong></strong></p>
+ <p class="plain">addBuddy()</p>
+</body>
+</html>

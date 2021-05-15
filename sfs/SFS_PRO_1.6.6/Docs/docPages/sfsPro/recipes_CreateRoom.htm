@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ 	<p class="title"><span class="subTitle"><a name="top" id="93"></a></span>6.x Java Extensions CookBook </p>
+	<p>
+		This document provides quick snippets of code organized by theme that will get you started with most of the
+		server side coding tasks. Feel free to suggest more "<em>recipes</em>" by sending us an email or posting in our <a href="http://www.smartfoxserver.com/forums" target="_blank">support forums</a></a>
+	</p>
+
+<p class="subTitle">&raquo; CreateRoom Recipes</p>
+<p>
+	Rooms can be dynamically created at any time and with many different settings. The following recipes will guide you through some of the most common uses cases.
+</p>
+
+
+<p class="buttonTitle"><strong>Recipe #1:</strong></p>
+<p>
+	In this recipe we show how to create a server-owned room at the initialization time of your Extension. Each room has an <em>owner</em> or <em>creator</em> that refers to the User that created it.
+	Rooms created by users will be auto-removed according to a simple set of rules that are discussed in various sections of the documentation ( <a href="http://www.smartfoxserver.com/docs/docPages/sfsPro/roomArchitecture.htm" target="_blank">see this article</a> )
+	There is however a special case in which the owner of the Room <strong>is the Server itself</strong>. In this case the room will never be auto-removed, unless done manually via code or Admin Tool.
+</p>		
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+Zone currentZone;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+	
+	createLobbyRoom();
+}
+
+private void createLobbyRoom()
+{
+	Room newRoom = null;
+
+	// Here we pass the room parameters
+	HashMap map = new HashMap();
+	map.put("name", "The Lobby");
+	map.put("pwd", "");
+	map.put("maxU", "99999");
+	map.put("maxS", "0");
+	map.put("isGame", "false");
+	map.put("isLimbo", "true");
+
+	try
+	{
+		newRoom = helper.createRoom(currentZone, map, null, true, false);
+	}
+	catch(ExtensionHelperException ehe)
+	{
+		this.trace("Could not create room: " + name + ", Reason: " + ehe.getMessage());
+	}
+
+	return newRoom;
+}	
+</pre>
+
+<p>
+	According to the <a href="http://www.smartfoxserver.com/docs/docPages/javadoc/index.html" target="_blank">javadoc</a> we pass a <em>Map</em> containing the necessary Room settings.
+</p>
+<ul>
+	<li><strong>name</strong>: the name of the room</li>
+	<li><strong>pass</strong>: an empty string for a <em>free access room</em> or any string for a <em>locked room</em></li>
+	<li><strong>maxU</strong>: the maximum number of users</li>
+	<li><strong>maxS</strong>: the maximum number of spectators</li>
+	<li><strong>isGame</strong>: true if this is a game room (not in this case)</li>
+	<li><strong>isLimbo</strong>: true to suppress all broadcast-type events (public message, user variables updates, room variables updates, etc...)</li>
+</ul>
+<p>The createRoom() method takes the following parameters:</p>
+<ul>
+	<li><strong>zone</strong>: the zone name</li>
+	<li><strong>params</strong>: the room settings</li>
+	<li><strong>creator</strong>: the room creator, in this case we pass <strong>null</strong> to assign the room to the Server</li>
+	<li><strong>sendUpdate</strong>: when true sends an update to the clients (default)</li>
+	<li><strong>broadcastEvent</strong>: if true fires an internal event in the current extension (default)</li>
+</ul>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #2:</strong></p>
+<p>
+	In this recipe we create a dynamic room upon user request and we also initialize the Room with a few room variables and attach a server side extension to it.
+</p>
+<p>The user request should contain the following parameters:</p>
+<ul>
+	<li><strong>gameName</strong>: the name of the game room</li>
+	<li><strong>type</strong>: the type of game (NavyBattle, MineField)</li>
+	<li><strong>numberOfPlayers</strong>: the number of players (2-4)</li>
+</ul>
+<p>Also note that the this time we call an overloaded version of the createRoom() method that takes 7 parameters</p>
+<ul>
+	<li><strong>zone</strong>: the zone name</li>
+	<li><strong>params</strong>: the room settings</li>
+	<li><strong>creator</strong>: the room creator, in this case we pass <strong>null</strong> to assign the room to the Server</li>
+	<li><strong>roomVars</strong>: the room variables</li>
+	<li><strong>setOwnership</strong>: set the ownership of each room variable</li>
+	<li><strong>sendUpdate</strong>: when true sends an update to the clients (default)</li>
+	<li><strong>broadcastEvent</strong>: if true fires an internal event in the current extension (default)</li>
+</ul>
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+Zone currentZone;
+final int DEFAULT_ROOM_SIZE = 10;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+}
+	
+public void handleRequest(String cmd, ActionscriptObject asObj, User user, int fromRoom)
+{
+	if (cmd.equals("makeGameRoom"))
+	{
+		String gameName = asObj.getString("gameName");
+		String type = asObj.getString("type");
+		int numberOfPlayers = (int) asObj.getNumber("nplayers");
+		
+		// Check supported games
+		if (!type.equals("NavyBattle") || !type.equals("MineField"))
+			throw new IllegalArgumentException("This game type is not suppoerted: " + type);
+			
+		// Check if the number of players is correct
+		if (numberOfPlayers &lt; 2 || numberOfPlayers &gt; 4)
+			throw new IllegalArgumentException("The requested number of players is not supported");
+			
+		Room gameRoom = createGameRoom(user, gameName, type, numberOfPlayers);
+	}
+}
+
+private void createLobbyRoom(User user, String gameName, String type, int numberOfPlayers)
+{
+	Room newRoom = null;
+
+	// Here we pass the room parameters
+	HashMap map = new HashMap();
+	map.put("name", gameName);
+	map.put("pwd", "");
+	map.put("maxU", String.valueOf(numberOfPlayers));
+	map.put("maxS", "0");
+	map.put("isGame", "true");
+	
+	// Prepare Room Variables
+	Map&lt;String, RoomVariable&gt; roomVariables = new HashMap&lt;String, RoomVariable&gt;();
+	roomVariables.put("gameStarted", new RoomVariable("false", RoomVariable.TYPE_BOOLEAN, null, true, false));
+	roomVariables.put("gameState", new RoomVariable("WAITING", RoomVariable.TYPE_STRING, null, true, false));
+	
+	// Prepare Extension
+	if (gameName.equals("NavyBattle"))
+	{
+		map.put("xtName", "gameExt");
+		map.put("xtClass", "com.smartfoxserver.games.NavyBattle");
+	}
+	else
+	{
+		map.put("xtName", "gameExt");
+		map.put("xtClass", "com.smartfoxserver.games.MineField");
+	}
+	
+	try
+	{
+		newRoom = helper.createRoom(currentZone, 
+					map, 
+					null, 
+					roomVariables, 
+					null,
+					true,
+					true, 
+					false);
+	}
+	catch(ExtensionHelperException ehe)
+	{
+		this.trace("Could not create room: " + name + ", Reason: " + ehe.getMessage());
+	}
+
+	return newRoom;
+}
+</pre>
+
+
+	
+ <p>&nbsp;</p>
+<hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="mailer.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

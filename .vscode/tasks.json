@@ -1,0 +1,32 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "java",
+			"label": "java: exportjar:sfs-new",
+			"targetPath": "${workspaceFolder}/lib/MultiplayerExtension.jar",
+			"elements": [
+				"${compileOutput}",
+				"${dependencies}"
+			],
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"type": "shell",
+			"label": "Develop Build",
+			"command": [
+				"javac",
+				"--class-path=sfs/SFS_PRO_1.6.6/Server/lib/json.jar:sfs/SFS_PRO_1.6.6/Server/lib/json-lib-2.1-jdk15.jar:sfs/SFS_PRO_1.6.6/Server/lib/jysfs.jar",
+				"--release",
+				"7",
+				"src/**/*.java"
+			],
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>SmartFoxServer Documentation</title>
+<link href="../../../api.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="plain">
+ <p class="itemName">Internal Event :: playerSwitched</p>
+ <p class="title">Availability:</p>
+ <p class="plain">SmartFoxServer PRO 1.6.6 </p>
+ <p class="title">Event name:</p>
+ <p class="plain"><strong>playerSwitched</strong></p>
+ <p class="title">Description:</p>
+<p class="plain">This event is fired when a player is turned into a spectator in a game room.
+  The event is available for both <strong>Zone
+  Level</strong> and <strong>Room Level</strong> extensions. The switch is usually
+  requested from the client side using the switchPlayer() request.
+<p class="title">Properties:</p>
+ <table  border="0" cellspacing="0" cellpadding="3">
+   <tr class="tHead">
+     <td valign="top" nowrap="nowrap">name</td>
+     <td>&nbsp;</td>
+     <td>description</td>
+     <td>type</td>
+   </tr>
+   <tr>
+     <td valign="top" nowrap="nowrap"><strong>user</strong></td>
+     <td>&nbsp;</td>
+     <td>The User (object) that was turned into a player <strong></strong></td>
+     <td>object</td>
+   </tr>
+</table>
+
+ <p class="title">Example:</p>
+<pre class="code">
+function handleInternalEvent(evtObj)
+{
+	if (evt.name == "playerSwitched")
+	{
+		var user = evt.user
+		trace("User: " + user.getName() + " is now a spectator in this game!")
+	}
+}
+</pre>
+<br /> 
+<p class="plain"><span class="title">See also:</span></p>
+ <p class="plain"><strong></strong></p>
+ <p class="plain">&nbsp;</p>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ 	<p class="title"><span class="subTitle"><a name="top" id="93"></a></span>6.x Java Extensions CookBook </p>
+	<p>
+		This document provides quick snippets of code organized by theme that will get you started with most of the
+		server side coding tasks. Feel free to suggest more "<em>recipes</em>" by sending us an email or posting in our <a href="http://www.smartfoxserver.com/forums" target="_blank">support forums</a></a>
+	</p>
+
+<p class="subTitle">&raquo; Using JSON Objects and protocol</p>
+<p>
+	While ActionscriptObjects are serialized in XML format, you can also use the more compact JSON serialization and protocol available from both client and server side.
+	The following recipes are based on the ActionscriptObject examples.
+</p>
+
+<p class="buttonTitle"><strong>Recipe #1:</strong></p>
+<p>The client sends an object containing a string and a number. The <em>sfs</em> object is a instance of the SmartFoxClient class and the three parmeters passed to the <em>sendXtMessage()</em> method are: the name of the extension, the <em>&quot;command&quot;</em> name and the parameters object.</p>
+<pre class="codeBlockClient">
+var obj:Object = {}
+obj.str = "Hello World!"
+obj.num = 54321
+
+sfs.sendXtMessage("test", "cmd", obj, "json")
+</pre>
+<p>Note that the in the sendXtMessage() 4th argument we have specifed the protocol type. On the server side you will receive a JSONObject: </p>
+		
+<pre class="codeBlockServer">
+public void handleRequest(String cmd, JSONObject jso, User u, int fromRoom)
+{
+	String str = jso.getString("str");
+	int num = jso.getInt("num");
+}
+</pre>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #2:</strong></p>
+<p>A slightly more complex example showing how to deal with nested objects.
+This time we also have an array of numbers.</p>
+
+<pre class="codeBlockClient">
+var obj:Object = {}
+obj.str = "Hello World!"
+obj.num = 54321
+obj.arr = [1,2,3,4,5]
+
+sfs.sendXtMessage("test", "cmd", obj, "json")
+</pre>
+
+<p>On the server side you will receive a JSONObject instance, called jso:</p>
+<pre class="codeBlockServer">
+public void handleRequest(String cmd, JSONObject jso, User u, int fromRoom)
+{
+	String str = jso.getString("str");
+	int num = jso.getInt("num");
+	JSONArray arr = jso.getJSONArray("arr");
+
+	// Cycle through all items
+	for (int i = 0; i &lt; arr.length(); i++)
+	{
+		System.out.println("Item " + i + " = " + arr.getInt(i));
+	}
+}
+</pre>			
+</p>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+
+<p class="buttonTitle"><strong>Recipe #3:</strong></p>
+<p>
+	This example shows how to create a more complex JSONObject. We want the client to receive an AS object like this:
+</p>
+
+<pre class="codeBlockClient">
+var obj:Object = {}
+obj.name = "King Arthur"
+obj.from = "Camelot"
+obj.age = 36
+obj.roundTable = true
+obj.inventory = {
+		weapons: ["knife", "sword", "long sword"],
+		food:["apple", "cheese", "bread", "wine"],
+		garments:["boots", "armor", "helmet"]
+		}
+</pre>
+
+<p>Here&#x27;s how we can create the object in Java:</p>
+<pre class="codeBlockServer">
+JSONObject jso = new JSONObject();
+jso.putString("name", "King Arthur");
+jso.putString("from", "Camelot");
+jso.putInt("age", 36);
+jso.putBoolean("roundTable", true);
+
+// Create the inventory object 
+JSONObject jsoInventory = new JSONObject();
+
+// Weapons array
+JSONArray jsaWeapons = new JSONArray();
+jsaWeapons.put("knife");
+jsaWeapons.put("sword");
+jsaWeapons.put("long sword");
+
+// Food array
+JSONArray jsaFood = new JSONArray();
+jsaFood.put("apple");
+jsaFood.put("cheese");
+jsaFood.put("bread");
+jsaFood.put("wine");
+
+// Garments array
+JSONArray jsaGarments = new JSONArray();
+jsaGarments.put("boots");
+jsaGarments.put("armor");
+jsaGarments.put("helmet");
+
+// Add objects to inventory
+jsoInventory.put("weapons", aoWeapons)
+jsoInventory.put("food", aoFood)
+jsoInventory.put("garments", aoGarments)
+
+// Add the invetory object to the main ActionscriptObject
+jso.put("inventory", aoInventory);
+</pre>			
+</p>
+
+
+	
+ <p>&nbsp;</p>
+<hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="mailer.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

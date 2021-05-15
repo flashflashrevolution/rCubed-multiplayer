@@ -1,0 +1,281 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ 	<p class="title"><span class="subTitle"><a name="top" id="93"></a></span>6.x Java Extensions CookBook </p>
+	<p>
+		This document provides quick snippets of code organized by theme that will get you started with most of the
+		server side coding tasks. Feel free to suggest more "<em>recipes</em>" by sending us an email or posting in our <a href="http://www.smartfoxserver.com/forums" target="_blank">support forums</a></a>
+	</p>
+
+<p class="subTitle">&raquo; Request Dispatching Recipes</p>
+<p>
+	In this chapter we suggest a request dispatching technique that can help better organizing the code when your extension needs to handle many different
+	user requests. Instead of cluttering the main extension class with handlers method and long switch/case blocks, we delegate the execution of each request to a separate class.
+</p>
+<p>
+	While dynamic languages such as Javascript, Actionscript, Python allow dynamic function invocation and passing functions around as objects, in Java we can't do this but we can encapsulate the method invocation
+	in separate classes with a common interface. Then we can instantiate them dynamically as we need them.
+</p>
+<p class="buttonTitle"><strong>Recipe #1:</strong></p>
+<p>
+	In this example we want to handle four different user requests. The client will send two numbers (x, y) and the id of an arithmetic operation (sum, sub, mul, div). The extension will handle each operation
+	by encapsulating them in separate classes, each one taking care of one request.
+</p>	
+<p>
+	First we need to define a common interface that the request handling classes will need to comply to.
+</p>
+<pre class="codeBlockServer">
+public interface IRequestHandler
+{
+	public void onRequest(ActionscriptObject asObj, User user, int fromRoom);
+}
+</pre>
+<p>
+	Next we define the four classes that handle the arithmetic operations:
+</p>
+<pre class="codeBlockServer">
+public class SumRequestHandler implements IRequestHandler
+{
+	public void onRequest(ActionscriptObject asObj, User user, int fromRoom)
+	{
+		int x = asObj.getInt("x");
+		int y = asObj.getInt("y");
+		
+		ActionscriptObject response = new ActionscriptObject();
+		response.put("_cmd", "sum");
+		response.put("res", x + y);
+		
+		// Prepare the list of recipients
+		LinkedList&lt;SocketChannel&gt; recipientList = new LinkedList&lt;SocketChannel&gt;();
+		recipientList.add(user.getChannel());
+
+		// Send response
+		sendResponse(response, -1, null, recipientList);
+	}
+}
+</pre>
+<p>This is the class for the subtraction operation:</p>
+<pre class="codeBlockServer">
+public class SubRequestHandler implements IRequestHandler
+{
+	public void onRequest(ActionscriptObject asObj, User user, int fromRoom)
+	{
+		int x = asObj.getInt("x");
+		int y = asObj.getInt("y");
+		
+		ActionscriptObject response = new ActionscriptObject();
+		response.put("_cmd", "sub");
+		response.put("res", x - y);
+		
+		// Prepare the list of recipients
+		LinkedList&lt;SocketChannel&gt; recipientList = new LinkedList&lt;SocketChannel&gt;();
+		recipientList.add(user.getChannel());
+
+		// Send response
+		sendResponse(response, -1, null, recipientList);
+	}
+}
+</pre>
+<p>This is the class for the multiplication operation:</p>
+<pre class="codeBlockServer">
+public class MulRequestHandler implements IRequestHandler
+{
+	public void onRequest(ActionscriptObject asObj, User user, int fromRoom)
+	{
+		int x = asObj.getInt("x");
+		int y = asObj.getInt("y");
+		
+		ActionscriptObject response = new ActionscriptObject();
+		response.put("_cmd", "mul");
+		response.put("res", x * y);
+		
+		// Prepare the list of recipients, in this case we only one.
+		LinkedList&lt;SocketChannel&gt; recipientList = new LinkedList&lt;SocketChannel&gt;();
+		recipientList.add(user.getChannel());
+
+		// Send response
+		sendResponse(response, -1, null, recipientList);
+	}
+}
+</pre>
+<p>This is the class for the division operation:</p>
+<pre class="codeBlockServer">
+public class DivRequestHandler implements IRequestHandler
+{
+	public void onRequest(ActionscriptObject asObj, User user, int fromRoom)
+	{
+		int x = asObj.getInt("x");
+		int y = asObj.getInt("y");
+		
+		ActionscriptObject response = new ActionscriptObject();
+		response.put("_cmd", "div");
+		response.put("res", x / y);
+		
+		// Prepare the list of recipients, in this case we only one.
+		LinkedList&lt;SocketChannel&gt; recipientList = new LinkedList&lt;SocketChannel&gt;();
+		recipientList.add(user.getChannel());
+
+		// Send response
+		sendResponse(response, -1, null, recipientList);
+	}
+}
+</pre>
+<p>
+	Now we can integrate a simple dispatching system in our extension that will allow us to easily add and remove any number of new requests
+	with little effort and without cluttering the code with conditions and logic methods.
+</p>
+<pre class="codeBlockServer">
+Map&lt;String, String&gt; invocationTable;
+ExtensionHelper helper;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	initInvocationTable();
+}
+
+public void initInvocationTable()
+{
+	invocationTable = new HashMap&lt;String, String&gt;()
+	invocationTable.put("sum", "SumRequestHandler");
+	invocationTable.put("sub", "SubRequestHandler");
+	invocationTable.put("mul", "MulRequestHandler");
+	invocationTable.put("div", "DivRequestHandler");
+}
+
+public void handleRequest(String cmd, ActionscriptObject asObj, User user, int fromRoom)
+{
+	String handlerClassName = invocationTable.get(cmd)
+
+	if (handlerClassName != null)
+	{
+		try
+		{
+			// Obtain the class object
+			Class handlerClass = Class.forName(handlerClassName);
+
+			// Create a new instance from its class
+			IRequestHandler handler = handlerClass.newInstance();
+
+			// Handle the request
+			handler.onRequest(asObj, user, fromRoom);
+		}
+		catch(ClassNotFoundException issue)
+		{
+			trace("Class was not found:" + handlerClassName);
+		}
+		catch(InstantiationException issue)
+		{
+			trace("Could not instantiate class:" + handlerClassName + ", Exception: " + issue);
+		}
+	}
+	else
+		throw new UnsupportedOperationException("Unknow request id: " + cmd)
+}
+</pre>
+<p>
+	The <strong>invocationTable</strong> map provides a simple mechanism for linking each request id with its handler class. By querying the map we are able to see if the user request has a matching handler class.
+	If the class is found we can instantiate it dynamically using the <strong>Class.forName()</strong> mechanism and pass the request parameters. The dynamic invocation might throw a couple of checked exceptions which
+	are taken care of in the surrounding try/catch block.
+</p>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+
+<p class="buttonTitle"><strong>Recipe #2:</strong></p>
+<p>
+	In this recipe we take a look at the client side (Actionscript 3) part and see how we can implement a similar mechanism for dynamically handling the server messages. We have at least two options:
+	<ul>
+		<li>Maintain the same Java-like approach, by declaring a common interface and a set of response-handling classes.</li>
+		<li>Taking advantage of the Actionscript 3 language core features to pass functions around as if they were objects.</li>
+	</ul>
+</p>
+<p>We think the most effective and elegant way is to use AS3 core features, which also helps making the code more succint and expressive.</p>
+<p>First we define the four function handlers:</p>
+<pre class="codeBlockClient">
+public function sumResponseHandler(data:Object):void
+{
+	trace("The result is: " + data.res)
+	// Do something cool here...
+}
+
+public function subResponseHandler(data:Object):void
+{
+	trace("The result is: " + data.res)
+	// Do something cool here...
+}
+
+public function mulResponseHandler(data:Object):void
+{
+	trace("The result is: " + data.res)
+	// Do something cool here...
+}
+
+public function divResponseHandler(data:Object):void
+{
+	trace("The result is: " + data.res)
+	// Do something cool here...
+}
+</pre>
+<p>
+	To keep the example as simple as possible we just print out the result and let your imagination think of what could happen next in each handler :)
+	What we want to focus on is the dynamic invocation mechanism, so let&#x27;s proceed with the rest of the code:
+</p>
+
+<pre class="codeBlockClient">
+public var invocationTable:Object
+public var sfs:SmartFoxClient
+
+// Initialize the invocation table
+public function init()
+{
+	// Init SmartFoxClient class
+	sfs = new SmartFoxClient()
+	sfs.addEventHandler(SFSEvent.onExtensionResponse, onExtensionResponse)
+	
+	// Init the invocation associtive array
+	invocationTable = {
+				sum : sumResponseHandler,
+				sub : subResponseHandler
+				mul : mulResponseHandler,
+				div : ResponseHandler,
+			}
+}	
+	
+public function onExtensionResponse(evt:SFSEvent):void
+{
+	var params:Object = evt.params.dataObj
+	var cmd:String = params._cmd
+	
+	var handlerFunction:Function = invocationTable[cmd]
+	
+	if (handlerFunction != null)
+		handlerFunction(params)
+	else
+		trace("Response handler not found for this response id: " + cmd)
+}
+</pre>
+
+<p>As you can see the code is definitely more concise and expressive using dynamic function invocation. 
+	Paired with the possibility to define functions at package-level, this approach allows you to organize the code in a very clean and efficient way.
+</p>
+	
+<p>&nbsp;</p>
+<hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="mailer.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

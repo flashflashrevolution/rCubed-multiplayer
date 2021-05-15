@@ -1,0 +1,246 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" charset="utf-8">
+	function showHide(element)
+	{
+		var node = document.getElementById(element)
+		if (node != null)
+		{
+			if (node.style.display == "none")
+				node.style.display = "block"
+			else
+				node.style.display = "none"
+		}
+		
+	}
+</script>
+</head>
+
+<body class="bodyStyle">
+ 	
+	<!-- ::::::: INTRO ::::::: -->
+	<p class="title">6.13 Developing Thread Safe Extensions</p>
+ 	<p>
+		In this document we are going to discuss the threading architecture in <strong>SmartFoxServer</strong> and how to write thread-safe extensions using Java, Actionscript and Python.<br>
+		Developers coming from a Java or Python background should already be familiar with multithread programming, while Actionscript coders would probably be less used to these concepts.
+		<br><br>
+		If you are interested in learning more we suggest to consult these external resources:
+		<ul>
+			<li>
+				<a href="http://www.ibm.com/developerworks/library/j-thread.html" title="Writing multithreaded Java applications" target="_blank">IBM article on multithreading</a>  
+			</li>
+			<li>
+				<a href="http://www.learnxpress.com/modules/contents/channels/prog,java,,multithreading.aspx" title="Programming | Java | Multithreading" target="_blank">Quick overview of multithreading</a>
+			</li>
+			<li>
+				<a href="http://www.javaworld.com/javaworld/jw-09-1998/jw-09-threads.html" title="Programming Java threads in the real world, Part 1 - Java World" target="_blank">Programming Java Threads</a>
+			</li>
+		</ul>
+	</p>
+	
+	<!-- ::::::: SMARTFOXSERVER ARCHITECTURE ::::::: -->
+	<p class="subTitle">&raquo; SmartFoxServer architecture overview</p>
+	<p>
+		The following diagram shows a simplified view of the internal architecture of the server:	
+		
+		<br><br>
+		<img src="images/sfs-arch.gif" alt="SmartFoxServer architecture overview" border="0">
+		<br><br>
+		
+		From the <strong>Server Core</strong> the incoming socket data is initially validated and assembled into messages. We're going to refer to these incoming messages as <em><strong>requests</strong></em>. Once we have a valid request we dispatch it to 		one of the two main request handlers: 
+		<ul>
+			<li>
+				<strong>System Handler:</strong> it is responsible for handling default requests such as "createRoom", "joinRoom", "sendPublicMessage" etc...
+			</li>
+			<li>
+				<strong>Extension Handler:</strong> manages requests for all the active extensions in the server.
+			</li>
+		</ul>
+	</p>
+	
+	<p>
+		Both controllers shown in the left side of the diagram use a <a href="http://en.wikipedia.org/wiki/Queue_%28data_structure%29" title="Queue (data structure) - Wikipedia, the free encyclopedia" target="_blank">blocking queue</a> and a <a href="http://en.wikipedia.org/wiki/Thread_pool" target="_blank" title="Thread pool pattern - Wikipedia, the free encyclopedia">thread pool</a> to accomplish their work: this means that each request is enqueued as soon as it is passed
+		to the controller and its worker threads will process them in the order they arrived.
+	</p>
+	<p>
+		It is important to note that by default <strong>both controllers use a single thread</strong> even if the server design implements a thread-pool: this is done to avoid running too many processes on a single CPU. 
+		Additional workers can be added if your hardware permits it (i.e. runs multiple dual/quad core CPUs), taking full advantage of parallel processing. All you have to do is simply edit a few lines in the main XML server configuration.
+	</p>
+	<p>
+		The <strong>Event Writer</strong> on the right side of the diagram is responsible for writing data back to the clients, and works similarly to the input controllers: outgoing
+		messages are piled up into the output queue and its worker threads will process them in order.<br>
+		The <strong>Event Writer</strong> uses one thread by default, but we usually recommend to increase this number if you're running a multi-core/multi-cpu system.
+		This stage of the server is usually quite busy especially when broadcasting events to a large number of clients simultaneously, for this reason the controller can benefit from multiple threads.
+	</p>
+	<p>Finally the <strong>Event Writer</strong> is not going to affect thread safety in extension development, but we have added it in the diagram for completeness.</p>
+	
+	<!-- ::::::: CODE EXECUTION ::::::: -->
+	<p class="subTitle">&raquo; Extension thread safety</p>
+	<p>After examining the server design we can now concentrate on how it can affect thread safety in our extension code.</p>
+	<p>
+		The following is a skeleton of a typical SmartFoxServer extension in Java:
+	</p>
+	
+<pre class="code">
+public class ExtensionTemplate extends AbstractExtension
+{
+	public void init()
+	{
+		trace("Extension initialized");
+	}
+
+	public void destroy()
+	{
+		trace("Extension destroyed");
+	}
+
+	public void handleRequest(String cmd, ActionscriptObject ao, User u, int fromRoom)
+	{
+		// Your code here
+	}
+
+	public void handleInternalEvent(InternalEventObject ieo)
+	{
+		// Your code here
+	}
+	
+	...
+	...
+}
+</pre>
+
+<a href="javascript:showHide('asExtSkeleton')" style="font-size:80%">{ Show/Hide Actionscript Code }</a>
+<br>
+<pre class="code" id="asExtSkeleton" style="display:none;">
+function init()
+{
+	trace("Extension initialized")
+}
+
+function destroy()
+{
+	trace("Extension destroyed")
+}
+
+function handleRequest(cmd, params, user, fromRoom)
+{
+	// Add your code here
+}
+
+function handleInternalEvent(evt)
+{
+	// Add your code here
+}
+</pre>
+
+<a href="javascript:showHide('pyExtSkeleton')" style="font-size:80%">{ Show/Hide Python Code }</a>
+<br>
+<pre class="code" id="pyExtSkeleton" style="display:none;">
+def init():
+	_server.trace("Python extension starting")
+
+
+def destroy():
+	_server.trace("Python extension stopping")
+
+
+def handleRequest(cmd, params, who, roomId, protocol):
+	pass
+
+
+def handleInternalEvent(evt):
+	pass	
+</pre>
+<p>
+	In the diagram below you can see how the server controllers will invoke methods on your extensions:
+<p>
+
+<img src="images/ext-threads.gif" alt="Extension threads diagram" border="0">
+
+<p>
+	From what we can see at least two different threads are going to invoke methods on the extension: the <strong>handleRequest</strong> method is always called by the <strong>Extension Handler</strong> while most of the internal events are fired by the <strong>System Handler</strong>.
+	Actually some of the disconnection events can also be fired by the <strong>Connection Cleaner</strong> classes which run their own thread.
+</p>
+<p>
+	We also need to mention the <a href="http://www.smartfoxserver.com/docs/docPages/tutorials_pro/18_scheduler/index.htm" title="SmartFoxServer: Actionscript 3 - Socket File Loader">Scheduler</a> class that was introduced in <strong>SmartFoxServer 1.6</strong> which simplifies the process of running time-based events
+	and the <strong>handlInternalRequest</strong> method that allows any object inside the server (including the embedded http-server) to call the extension code.
+</p>
+<p style="border: 1px dotted #cc0000; background-color:#ffffee; padding:10px;">
+	<strong>To sum it all up</strong>: even in the simplest extension we have at least <strong>2 different threads</strong> calling our code.<br>
+	This implies that we need to make sure that access to globally shared data is performed in a thread-safe way.
+</p>
+<p>Here are a few suggestion for common thread-safe access to data:</p>
+<ul>
+	<li>
+		<strong>Shared collections</strong> (Sets, Lists, Maps...): Java 5 introduced a series of powerful thread-safe collections such as ConcurrentHashMap, BlockingQueue, CopyOnWriteArrayList etc... 
+		We highly recommend to invest some time in learning these new classes as they are great time-savers and offer high performance.<br>
+		To learn more check these pages:<br><br>
+		
+		<a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/Collection.html" target="_blank" title="Collection (Java 2 Platform SE 5.0)">&raquo; Java 5 Collections</a><br>
+		<a href="http://www.ibm.com/developerworks/java/library/j-tiger06164.html" target="_blank" title="Taming Tiger: Concurrent collections">&raquo; Concurrent Collections</a>
+	</li>
+	<br>
+	<li>
+		<strong>Custom properties in Room and User objects</strong>: both the <strong>Room</strong> and <strong>User</strong> classes offer a simple mechanism for storing custom values by exposing a public <strong>properties</strong> member of type <strong>Map</strong>.
+		By default the server uses an <strong>HashMap</strong> implementation which is not thread safe, so you will have to properly synchronize the accesses.
+		<br><br>
+		Starting from <strong>SmartFoxServer 1.6</strong> we have introduced a new configuration parameter called <strong>&lt;DynamicPropertiesClass&gt;</strong> which allows to specify which class (extending java.util.Map) we want to use, for example: <strong>java.util.concurrent.ConcurrentHashMap</strong>
+	</li>
+	<br>
+	<li>
+		<strong>Database access</strong>: the SmartFoxServer <strong>DbManager</strong> class already implements thread-safe access so you don't have to worry about it.
+	</li>
+	<br>
+	<li>
+		<strong>Shared files</strong>: in case your application works with streams that are referenced globally (and accessed in both handleRequest and handleInternalEvent) we suggest to make sure that all accesses are properly synchronized.
+	</li>
+	<br>
+	<li>
+		<strong>Custom threads</strong>: there is no particular problem with running your own threads in the extension code, just make sure to shut them down in the <strong>destroy()</strong> method 
+		of your extension. Forgetting about this can lead to unexpected behaviors and memory leaks.
+	</li>
+</ul>
+
+<p class="subTitle">&raquo; Server framework thread safety</p>
+<p>
+	Most of the SmartFoxServer Java framework is accessed through the <strong>ExtensionHelper</strong> class which exposes methods for creating and removing rooms, access the buddy list and database and much more... 
+	All these methods are already thread safe unless differently specified.
+</p>
+
+
+<!-- ::::::: SCRIPTING LANGUAGES ::::::: -->
+<div style="float:right;">
+	<img src="images/javascript.gif" ><br>
+	<img src="images/python.gif">
+</div>
+<p class="subTitle">&raquo; Thread safety using Actionscript and Python</p>
+<p>
+	The scripting languages available with the SmartFoxServer framework are <strong>Java implementations</strong> that run in the JVM together with the other server classes.
+	The scripts are compiled into Java byte-code at runtime and are subject to the same threading rules described in this document.
+	Thread safety is already encapsulated in these language implementations so you should be able to use the <strong>Actionscript</strong> or <strong>Python</strong> objects and native collections without
+	worries. <br>
+	There are however a few cases where concurrent access to a shared resource should be tested to avoid problems when in production: for example the access to physical resources such as files and external network connections.
+</p>
+<p>
+	Advanced developers can also take advantage of the JVM environment to access the Java framework, the other currently loaded objects or their custom classes.
+	When working with Java classes always make sure that they are thread safe as the scripting languages don't provide any construct that is similar to the <strong>synchronized</strong> keyword in Java.
+	In the case of custom classes it is highly recommended to encapsulate all the synchronization details in your Java code.<br>
+	Finally we also recommended to take a look at the Java 5 (and Java 6) concurrent collections (mentioned earlier in this article) which provide even better performance
+	than the native collections found in Actionscript and Python.
+</p>
+	
+<p>&nbsp;</p>
+
+<hr width="99%" size="1" noshade>
+<div align="center">
+	<a href="../../../index.htm" target="_top" class="navLinks">doc index </a>
+</div>
+
+</body>
+</html>

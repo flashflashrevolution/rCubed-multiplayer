@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>SmartFoxServer Documentation</title>
+<link href="../../../api.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="plain">
+ <p class="itemName">_server.banUser()</p>
+ <p class="title">Availability:</p>
+ <p class="plain">SmartFoxServer PRO 1.6.3 </p>
+ <p class="title">Usage:</p>
+ <p class="plain">_server.banUser(user, delay, farewellMessage, banType)</p>
+ <p class="title">Description:</p>
+<p class="plain">
+	Bans a user from the server after a certain amount of seconds. The <strong>farewellMessage</strong>
+	allows you to immediately send an Administrator Message to the user being banned. On the client side the message
+	should be handled via the <em>onAdministratorMessage</em> callback.
+</p> 
+<p class="title">Properties:</p>
+ <table  border="0" cellspacing="0" cellpadding="3">
+   <tr>
+     <td valign="top" nowrap="nowrap"><strong>user</strong></td>
+     <td>&nbsp;</td>
+     <td>the user to ban</td>
+   </tr>
+
+	<tr>
+     <td valign="top" nowrap="nowrap"><strong>delay</strong></td>
+     <td>&nbsp;</td>
+     <td>the amount of delay (in seconds) before the action is performed</td>
+   </tr>
+
+	<tr>
+     <td valign="top" nowrap="nowrap"><strong>farewellMessage</strong></td>
+     <td>&nbsp;</td>
+     <td>an Administrator Message that is delivered immediately to the client </td>
+   </tr>
+
+	<tr>
+    <td valign="top" nowrap="nowrap"><strong>type</strong></td>
+    <td>&nbsp;</td>
+    <td>
+		allows to specify if the user should be banned by <strong>IP address</strong> or <strong>name</strong>.
+		Acceptable values are <strong>_server.BAN_BY_NAME</strong> and <strong>_server.BAN_BY_IP</strong>
+	</td>
+  </tr>
+ </table>
+ <p class="title">Returns:</p>
+ <p class="plain">nothing.</p>
+
+<p class="title">Example:</p>
+<pre class="code">
+/*
+* Bans a user (it.gotoandaply.smartfoxserver.data.User) referenced by the bannableUser variable
+* The action is delayed by 10 seconds
+* The user is banned by Name
+*/
+
+_server.banUser(bannableUser, 10, "You're banned!", _server.BAN_BY_NAME)
+</pre>
+<br /> 
+<p class="plain"><span class="title">See also:</span></p>
+ <p class="plain"><strong>kickUser, banOfflineUser, removeBanishment</strong></p>
+ <p class="plain">&nbsp;</p>
+</body>
+</html>

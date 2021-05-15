@@ -1,0 +1,358 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<title>SmartFoxServer Documentation</title>
+		<script language="javascript" src="../../lib.js"></script>
+		<link href="../../main.css" rel="stylesheet" type="text/css">
+		
+		<style type="text/css" media="screen">
+			.sideNoteTitle
+			{
+				font-size: 120%;
+				font-weight: bold;
+				color: #888;
+			}
+			.sideNote
+			{
+				font: 110% Georgia, Verdana, Arial;
+				line-height: 19px;
+				margin: 20px;
+				padding: 10px;
+				background-color: #f6f6f6;
+				border: 2px dashed #CCC;
+				color: #333;
+			}
+		</style>
+	</head>
+
+<body class="bodyStyle">
+	 <p class="title">6.10 Buddy Lists 2.0</p>
+	 <p>
+	 	With the release of <strong>SmartFoxServer 1.6</strong> the buddy-list system has been greatly enhanced with new features that help integrating an instant messaging systems in your multi-player applications.
+	 </p>
+	<p>
+		Among the new functionalities that were introduced there are:
+		<ul>
+			<li>Persistent buddy variables</li>
+			<li>Offline buddy variables</li>
+			<li>Black lists: ability to block buddies</li>
+			<li>Add buddy requires user permission</li>
+			<li>Mutual add/remove buddy</li>
+			<li>Custom persistence classes</li>
+			<li>Better performance</li>
+		</ul>  
+	</p>
+	<p>&nbsp;</p>
+	
+	<!-- BUDDY VARIABLES -->
+	<p class="subTitle">&raquo; Buddy Variables</p>
+	<img src="images/blist_example01.jpg" alt="offline variables example" align="right" class="imgBorder"/>
+	
+	<p>
+		<strong>Buddy variables</strong> allow to define custom states for each buddy: a typical usage is to set one variable 
+		with the current status of the 
+		buddy (e.g. available, occupied, invisible etc...). This feature already existed in previous versions of the server 
+		( see SmartMessenger example ) but it didn't allow to store these values. Buddy variables only existed during the user session.
+	</p>
+	
+	<p>
+		The <strong>Buddy List 2.0</strong> framework not only adds the ability to persist all buddy variables but it also introduces <strong>off-line buddy variables.</strong> 
+	</p>
+	
+	<p>
+		While <em>regular variables</em> become "active" when its owner comes online in the system, off-line variables are loaded regardless the user is online or not, providing further informations for each entry in the buddy-list.<br>
+		A typical usage for these variables is to define an image, a status or additional informations such as country, email, rank etc...
+	</p>
+	<p>
+		We established a simple new convention where each buddy variable starting with a <strong>$</strong> symbol is treated as an off-line variable, so it will available for all clients regardless that the buddy is online or not.
+	</p>
+	<p>This is a simple code example:</p>
+	<pre class="code">
+var buddyVariables:Object = {}
+buddyVariables.$rank = 5
+buddyVariables.$country = "Italy"
+buddyVariables.$image = "animal.png"
+
+smartFox.setBuddyVariables( buddyVariables )
+	</pre>
+	<p>&nbsp;</p>
+	
+	
+	<!-- ENHANCED SECURITY -->
+	<p class="subTitle">&raquo; Enhanced security options</p>
+	<p>Another important aspect with buddy-list based application is preventing unwanted messages, flooding and being able to selectively disable annoying users.</p>
+	<p>The Buddy List 2.0 adds the following functionalities:</p>
+	<ol>
+		<li>
+			<strong>Block / unblock users in the buddy list</strong>: when a user is blocked 
+			he will continue to see you in his buddy list but he won't be able to send any message.<br><br>
+		</li>
+		<li>
+			<strong>Buddy list requests</strong>: each time a user adds a buddy to his list the latter will receive a notification and he will
+			be able to <strong>accept</strong> or <strong>refuse</strong> the request.<br>
+			<strong>Example:</strong> 
+			<ul>
+				<li>User A wants to add User B in his list.</li>
+				<li>User B receives the request</li>
+				<li>If he accepts User A will have User B in his buddy list, otherwise the operation will be stopped.<br><br></li>
+			</ul>
+		</li>
+		<li>
+			<strong>Mutual add buddy</strong>: when this feature is turned on both users involved in a "add buddy transaction" 
+			will be added to their respective buddy list after the target user as accepted the request.<br>
+			<strong>Example:</strong> 
+			<ul>
+				<li>User A wants to add User B in his list.</li>
+				<li>User B receives the request and accepts it.</li>
+				<li>User A will be added to User B buddy list</li>
+				<li>User B will be added to User A buddy list</li>
+			</ul><br>
+		</li>
+		<li>
+			<strong>Mutual remove buddy</strong>: when one of the two users removes a buddy from his list the same will happen the 
+			buddy user.<br>
+			<strong>Example:</strong> 
+			<ul>
+				<li>User A removes User B from his list.</li>
+				<li>User B automatically removes user A from his list</li>
+			</ul>
+		</li>
+	</ol>
+	<p>&nbsp;</p>
+	
+	<!-- NEW IN THE API... -->
+	<p class="subTitle">&raquo; What's new in the API</p>
+	<p>
+		While server side there are a lot of new things going on, on the client side the Flash/Flex API handle most of the new
+		features <strong>transparently</strong>. Developers won't find big changes in the new API and all the old pre-1.6 
+		applications will <strong>keep working</strong> without a hitch.
+	</p>
+	<p>The API now expose the following new items, related with buddy list management:</p>
+	<ul>
+		<li><strong>sendBuddyPermissionResponse():</strong> a new method for allowing/rejecting the add buddy request</li>
+		<li><strong>setBuddyBlockStatus():</strong> set the "block" status for a buddy in the user's buddy list</li>
+		<li><strong>onBuddyPermissionRequest():</strong> new event triggered when a user is trying to a buddy to his list</li>
+	</ul>
+	<p>
+		The <strong>server side framework</strong> has also been enriched with the corresponding client side method: addBuddy, removeBuddy, setBuddyVariables, setBuddyBlockStatus, requestAddBuddyPermission. This will enable developers to take full control on buddy list management in their server side logic.
+	</p>
+	<p>
+		&nbsp;
+	</p>
+	
+	
+	<!-- CUSTOM PERSISTENCE -->
+	<p class="subTitle">&raquo; Custom Persistence classes</p>
+	<p>
+		The new <strong>Buddy List 2.0</strong> doesn't use a file-based storage system anymore. Instead, it uses an internal
+		high-performance database which provides better speed and security.
+	<p>
+		If the way in which this is handled still doesn't match your requirements, we also provide the ability to write your 
+		own Java classes that are responsible for loading/saving all buddy lists within a specific Zone. 
+		( Each Zone can specify its own "buddy list persister" )
+	</p>
+	<p>The interface for a Buddy List persister class is pretty simple:</p>
+	<pre class="code">
+public class MyPersister extends AbstractBuddyPersister
+{
+	@Override
+	public void init( Object param ) { }
+
+	@Override
+	public void destroy( Object param )	{ }
+
+	@Override
+	public StorableBuddyList loadList( String userName ) { }
+
+	@Override
+	public boolean saveList( String userName, StorableBuddyList buddyList ) { }
+	
+	@Override
+	public Map&lt;String, String&gt; getOfflineVariables( String userName ) { }
+
+	@Override
+	public boolean removeOfflineBuddy( String owner, String buddyName ) { }
+}
+	</pre>	
+	
+	<p>
+		Let's go through each method and see what they are used for:
+		<ul>
+			<li>
+				<strong>init()</strong>: here you can put initializion code that is necessary for you custom persister class, be it a database connection, file references etc... 
+			</li>
+			<br>
+			<li>
+				<strong>destroy()</strong>: this method is called by the server when shutting down. Make sure to release all the resources here (shut down db connections, close files etc...)
+			</li>
+			<br>
+			<li>
+				<strong>loadList()</strong>: this method is called every time a user sends a <em>loadBuddyList</em> request. The <strong>userName</strong> passed is the buddy-list owner name.
+				The <strong>userName</strong> parameter should be used as a key in your custom persister to locate the data for that user.
+			</li>
+			<br>
+			<li>
+				<strong>saveList()</strong>: this method is called by the server each time it is necessary to store changes for a certain user's buddy-list. It should return <strong>true</strong> if the save operation was succesfull or <strong>false</strong> otherwise.				
+			</li>
+			<br>
+			<li>
+				<strong>getOfflineVariables()</strong>: this method is optional.<br>
+				It is required if your BuddyList 2.0 is configured to use offline buddy variables.<br>
+				If you are using them, the method should be implemented in your custom class and you should return a map of key-value representing each variable for the specified user.
+				The method is called by the server when loading a buddy-list. 
+			</li>
+			<br>
+			<li>
+				<strong>removeOfflineBuddy</strong>: this method is optional.<br>
+				It is necessary to implement it if you are using the mutual add/remove feature.<br>
+				Suppose <strong>User A</strong> and <strong>User B</strong> have added each other in their buddy lists. <strong>User A</strong> is online and <strong>User B</strong> is off-line.<br>
+				If <strong>User A</strong> removes <strong>User B</strong> from its buddy list we will also need that <strong>User A</strong> is removed from <strong>User B</strong>'s list, in order to honor the mutal add/remove feature.
+				This method is invoked in such event to allow the developer perform the necessary changes to the buddy-list of the user that is off-line. (In this example it would <strong>User B</strong>)
+			</li>
+		</ul>
+	</p>
+	
+	<p>Here's an example of a very simple persistence class:</p>
+
+<pre class="code">
+package test.persister;
+
+import it.gotoandplay.smartfoxserver.SmartFoxServer;
+import it.gotoandplay.smartfoxserver.data.buddylist.StorableBuddyItem;
+import it.gotoandplay.smartfoxserver.data.buddylist.StorableBuddyList;
+import it.gotoandplay.smartfoxserver.data.buddylist.persistence.AbstractBuddyPersister;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
+public class SFSCustomBuddyPersiter extends AbstractBuddyPersister 
+{
+
+	@Override
+	public void init(Object param) 
+	{
+		info("CUSTOM Persister initialized.");
+	}
+
+	@Override
+	public void destroy(Object param) 
+	{
+		info("CUSTOM Persister shutting down.");
+	}
+
+	@Override
+	public StorableBuddyList loadList(String userName) 
+	{
+		Random rnd = new Random();
+
+		StorableBuddyList theList = new StorableBuddyList(userName);
+		theList.buddies = new ArrayList&lt;StorableBuddyItem&gt;();
+
+		for (int i = 0; i &lt; 10; i++)
+		{
+			StorableBuddyItem buddyItem = new StorableBuddyItem("Buddy__" + rnd.nextInt(1000));
+			//buddyItem.isBlocked = false;
+
+			theList.buddies.add(buddyItem);
+		}
+
+		info("Buddy List loaded for user: " + userName);
+		return theList;
+	}
+
+	@Override
+	public boolean saveList(String userName, StorableBuddyList buddyList) 
+	{
+		// TODO Auto-generated method stub
+		info("Saving buddy list for user: " + userName);
+		for (StorableBuddyItem buddyItem : buddyList.buddies)
+		{
+			System.out.println("\t> " + buddyItem.name);
+		}
+
+		return true;
+	}
+
+	@Override
+	public Map&lt;String, String&gt; getOfflineVariables(String userName) 
+	{
+		info("getOfflineVariables called for user: " + userName);
+		return new HashMap&lt;String, String&gt;();
+	}
+
+	@Override
+	public boolean removeOfflineBuddy(String owner, String buddyName) 
+	{
+		// Called when removing a buddy that is currently offline
+		// and the mutualRemove is active 
+
+		return true;
+	}
+
+	private void info(String msg)
+	{
+		SmartFoxServer.log.info(msg);
+	}
+}
+</pre>	
+	
+	<p>
+		In the <strong>loadList()</strong> method we create a <em>fake</em> buddy list by generating random user names, just to give you an idea
+		of how this should work. When you deploy the persister class and test it with the provided client side example (See tutorial 8.16) you will notice
+		that each user will load a buddy list of 10 random names.
+	</p>
+	<p>
+		Similarly, in the <strong>saveList()</strong> method, we simply go through the buddy list elements in the passed list and output each buddy name.
+		It will be the developer's job to fill the code with the actual logic that stores data to his preferred location and format. Possible solutions would include local or remote files, databases, web services etc..
+	</p>
+	<p>
+		Finally, when the class is complete, you will need to deploy and activate it.
+		<ul>
+			<li>
+				<strong>Deployment</strong>: the simplest way to deploy a custom persister is by copying it in a folder that is already in the SFS classpath. 
+				The <strong>Server/</strong> folder is one of them and we recommend to use it if you don't want to modify your current classpath.<br>
+				Alternatively you can deploy the class(es) in any other location provided that you change the server classpath accordingly. 
+			</li>
+			<br>
+			<li>
+				<strong>Activation</strong>: telling SmartFoxServer to use your custom persister class is a matter of adding one line of Xml in your server configuration.
+				Simply open your configuration file, reach the <strong>&lt;BuddyList&gt;</strong> declaration and add the following tag &lt;persisterClass&gt;x.y.z&lt;/persisterClass&gt; where <strong>x.y.z</strong> is the 
+				fully qualified name of your class.<br><br>
+				In the case of our previous example it would be:<strong> &lt;persisterClass&gt;test.persister.SFSCustomBuddyPersiter&lt;/persisterClass&gt;</strong>
+			</li>
+		</ul>
+	</p>
+	<p  style="border: 1px dotted #cc0000; background-color:#ffffee; padding:10px;">
+		<strong>NOTE:</strong>
+		One last note about thread safety: when coding your buddy-list persister classes, you should always assume that you're dealing with a multi-threaded environment and make the appropriate choices in order to ensure
+		thread safety for all objects that could be accessed concurrently.
+	</p>
+	<!-- LEARN MORE -->
+	<p class="subTitle">&raquo; Learn more</p>
+	<p>
+		You can find more details about the new BuddyList 2.0 by checking these documents:
+		<ul>
+			<li><a href="../tutorials_pro/16_buddyList2/index.htm">Advanced BuddyList Demo Tutorial</a></li>
+			<li><a href="../config/basics.htm#zone">Buddy List configuration parameters</a> (scroll down a bit)</li>
+			<li><a href="/docs/docPages/javadoc" target="_blank">The javadoc</a></li>
+		</ul>
+	</p>
+<p>&nbsp;</p>
+
+	<hr width="99%" size="1" noshade>
+	<table width="99%"  border="0" cellspacing="0" cellpadding="4">
+	  <tr>
+	    <td width="33%">&nbsp;</td>
+	    <td width="34%" align="center"><a href="../../../index.htm" target="_top" class="navLinks">doc index </a></td>
+	    <td width="33%" align="right">&nbsp;</td>
+	  </tr>
+	</table>
+
+
+	
+</body>
+</html>

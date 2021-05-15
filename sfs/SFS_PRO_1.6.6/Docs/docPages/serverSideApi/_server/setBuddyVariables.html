@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>SmartFoxServer Documentation</title>
+<link href="../../../api.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="plain">
+ <p class="itemName">_server.setBuddyVariables()</p>
+ <p class="title">Availability:</p>
+ <p class="plain">SmartFoxServer PRO 1.6.0 </p>
+ <p class="title">Usage:</p>
+ <p class="plain">_server.setBuddyBlockStatus(user, variables)</p>
+ <p class="title">Description:</p>
+<p class="plain">Set the buddy variables of the specified user.</p>
+<p class="plain">The variables object contains all the variables to set, where the key is the name of the variable and the value represents the variable value.</p>
+<p class="plain">
+ Since version <b>1.6.0</b> you can set off-line buddy variables by using a &quot;<strong>$</strong>&quot; sign as the first character of the variable name.<br>
+</p>
+<p class="plain">
+	For a complete overview of the <strong>Buddy List 2.0</strong> system introduced in version 1.6 check <a href="../../sfsPro/buddyList2.htm" target="blank">this document.</a>
+</p>
+<p class="title">Properties:</p>
+ <table  border="0" cellspacing="0" cellpadding="3">
+   <tr>
+     <td valign="top" nowrap="nowrap">
+		<strong>user</strong>
+	</td>
+     <td>&nbsp;</td>
+     <td>the user, owner of the variables</td>
+   </tr>
+
+	<tr>
+	     <td valign="top" nowrap="nowrap">
+			<strong>variables</strong>
+		</td>
+	     <td>&nbsp;</td>
+	     <td>an associative array where both keys and values are of type String</td>
+	   </tr>
+ </table>
+ <p class="title">Returns:</p>
+ <p class="plain">nothing, it will fire and <strong>onBuddyListUpdate</strong> event on the client side.</p>
+ <p class="title">Example:</p>
+<pre class="code">
+// Set some buddy variables
+var variables = {}
+variables.$country = "Italy"	// off-line variable
+variables.invisible = true		// regular variable
+
+_server.setBuddyVariables(user, variables)
+</pre>
+<br /> 
+<p class="plain"><span class="title">See also:</span></p>
+ <p class="plain"><strong></strong></p>
+ <p class="plain">addBuddy(), removeBuddy()</p>
+</body>
+</html>

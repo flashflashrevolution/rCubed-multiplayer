@@ -1,0 +1,333 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ 	<p class="title"><span class="subTitle"><a name="top" id="93"></a></span>6.x Java Extensions CookBook </p>
+	<p>
+		This document provides quick snippets of code organized by theme that will get you started with most of the
+		server side coding tasks. Feel free to suggest more "<em>recipes</em>" by sending us an email or posting in our <a href="http://www.smartfoxserver.com/forums" target="_blank">support forums</a></a>
+	</p>
+
+<p class="subTitle">&raquo; JoinRoom Recipes</p>
+<p>
+	Joining room from the server side has many advantages as it allows the developer to have full control over user activities avoiding possible problems arising from
+	hacked clients sending malicious requests.
+</p>
+<p>
+	In order to join any room from client side you should always make sure that the current client is in the <em>&quot;proper state&quot;</em> before joining a room.
+	The fundamental requirement is that before a user can join a room is that he has already received the room list, which populates the necessary data structures on the client side.
+</p>
+<p>These steps should always be followed:</p>
+<ul>
+	<li>Client establishes connection to server</li>
+	<li>Client sends a login request</li>
+	<li>Client receives the room list (can be requested from client side or sent from server side upon successfull login)</li>
+</ul>
+<p>Once this is done you can start creating rooms dynamically from server side and join the user in one of them</p>
+
+
+<p class="buttonTitle"><strong>Recipe #1:</strong></p>
+<p>In this recipe we follow the sequence mentioned above: once the user is logged in, we send the room list and join the user in the <em>Lobby</em> room.</p>		
+<pre class="codeBlockServer">
+List&lt;String&gt; validNames;	
+ExtensionHelper helper;
+Zone currentZone;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+	
+	validNames = new ArrayList&lt;String&gt;();
+	validNames.add("Pierre");
+	validNames.add("Michelle");
+	validNames.add("Gunther");
+	validNames.add("Christine");
+	validNames.add("Nicole");
+}
+	
+public void handleInternalEvent(InternalEventObject evt)
+{
+	if (evt.getEventName().equals(InternalEventObject.EVENT_LOGIN))
+	{
+		boolean ok = false;
+		User newUser = null;
+		
+		// Prepare a response object for the client
+		ActionscriptObject response = new ActionscriptObject();
+		
+		// get the user nickname and password (not used in this example)
+		String nick = ieo.getParam("nick");
+		String pass = ieo.getParam("pass");
+		
+		// get the user socket channel
+		SocketChannel chan = (SocketChannel) ieo.getObject("chan");
+		
+		// validate user name
+		if (validNames.contains(nick))
+			ok = true;
+		
+		if (ok)
+		{
+			try
+			{
+				// Attempt to login the user in the system
+				newUser = helper.canLogin(nick, pass, chan, currentZone);
+
+				res.put("_cmd", "logOK");
+				res.put("id", String.valueOf(newUser.getUserId()));
+				res.put("name", newUser.getName());
+
+				ok = true;
+			}
+			
+			// An exception occurred while logging the user in
+			catch (LoginException le)
+			{
+				this.trace("Could not login user: " + nick);
+
+				res.put("_cmd", "logKO");
+				res.put("err", le.getMessage());
+			}
+		}
+		
+		// The user name is not among the valid ones
+		else
+		{
+			res.put("_cmd", "logKO");
+			res.put("err", "Sorry, your user name was not accepted.");
+		}
+		
+		// Prepare the list of recipients, in this case we only one.
+		LinkedList ll = new LinkedList();
+		ll.add(chan);
+
+		// Send login response
+		sendResponse(res, -1, null, ll);	
+
+		// Send room list
+		if (ok)
+		{
+			helper.sendRoomList(chan);
+			
+			// Join the user
+			Room lobbyRoom = currentZone.getRoomByName("Lobby");
+		
+			/*
+			* Here are the joinRoom parameters:
+			*
+			* user: the user
+			* newRoom: the id of the room to join
+			* leaveRoom: true if you want to leave a previous room
+			* password: a password for the room in case it is password protected (empty otherwise)
+			* isSpectator: true if the user should be joined as spectator (game rooms only)
+			* broadcast: true to fires an update back to the clients (defualt)
+			*/
+			try
+			{
+				helper.joinRoom(newUser, lobbyRoom.getId(), false, "", false, true);
+			}
+			catch (ExtensionHelperException issue)
+			{
+				trace("Ouch join failed: " + issue)
+			}
+		}
+	}
+}
+</pre>
+<p>
+	The code follows the steps mentioned in the introduction (login, send room list, join room) and it will fire three events consecutively on the client side:
+	<ul>
+		<li><strong>onExtensionResponse</strong>: for the logOK/logKO login response</li>
+		<li><strong>onRoomListUpdate</strong>: for the room list</li>
+		<li><strong>onJoinRoom</strong>: on successful join</li>
+	</ul>
+</p>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #2:</strong></p>
+<p>
+	The following recipe shows how to join or create-and-join a room. This technique allows you to dynamically create rooms on-demand as the number of users increases.
+	The code is taken from the PixelGame tutorial found at chapter <strong>8.10 of the documentation</strong>.
+</p>
+<p>
+	The example starts with no rooms available in the Zone. As new users log in we create fixed-size rooms to accomodate the players.
+</p>
+<p>In order to keep the code short and concise the login process doesn&#x27;t perform any credential checks.</p>
+
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+Zone currentZone;
+int roomCounter = 0;
+final int ROOM_SIZE = 10;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+}
+	
+public void handleInternalEvent(InternalEventObject evt)
+{
+	if (evt.getEventName().equals(InternalEventObject.EVENT_LOGIN))
+	{
+		boolean ok = false;
+		User newUser = null;
+		
+		// Prepare a response object for the client
+		ActionscriptObject response = new ActionscriptObject();
+		
+		// get the user nickname and password (not used in this example)
+		String nick = ieo.getParam("nick");
+		String pass = ieo.getParam("pass");
+		
+		// get the user socket channel
+		SocketChannel chan = (SocketChannel) ieo.getObject("chan");
+
+		try
+		{
+			// Attempt to login the user in the system
+			newUser = helper.canLogin(nick, pass, chan, currentZone);
+
+			res.put("_cmd", "logOK");
+			res.put("id", String.valueOf(newUser.getUserId()));
+			res.put("name", newUser.getName());
+
+			ok = true;
+		}
+		
+		// An exception occurred while logging the user in
+		catch (LoginException le)
+		{
+			this.trace("Could not login user: " + nick);
+
+			res.put("_cmd", "logKO");
+			res.put("err", le.getMessage());
+		}
+		
+		// Prepare the list of recipients, in this case we only one.
+		LinkedList ll = new LinkedList();
+		ll.add(chan);
+
+		// Send login response
+		sendResponse(res, -1, null, ll);	
+
+		if (ok)
+		{
+			// Send room list
+			helper.sendRoomList(chan);
+			
+			// Join room, or create one if it doesn't exist and then join it!
+			joinOrCreateRoom(newUser)
+		}
+	}
+}
+
+private void joinOrCreateRoom(User u)
+{
+	// Get a list of rooms available
+	Object[] rList = zone.getRooms();
+	Room room = null;
+	boolean found = false;
+	
+	// Cycle through all rooms
+	for (int i = 0; i &lt; rList.length; i++)
+	{
+		room = (Room) rList[i];
+		
+		// Check there&#x27;s at least one user slot available
+		if (room.howManyUsers() &lt; room.getMaxUsers())
+		{
+			joinTheRoom(u, room)
+			found = true;
+			break;
+		}
+	}
+	
+	// ... a free slot was not found, let's make a new room
+	if (!found)
+	{
+		// Create an automatic name for the room
+		String rName = "AutoRoom_" + roomCounter;
+		roomCounter++;
+		
+		// Create room
+		Room newRoom = makeNewRoom(rName, ROOM_SIZE, u);
+		
+		if (newRoom != null)
+		{
+			joinTheRoom(newRoom)
+		}
+	}
+}
+
+private void joinTheRoom(User u, Room r)
+{
+	try
+	{
+		// Room found! Let's join the user inside
+		helper.joinRoom(u, -1, r.getId(), false, "", false, true);
+	}
+	catch (ExtensionHelperException issue)
+	{
+		this.trace("Oops, user: " + u.getName() + " couldn't join. Reason: " + issue.getMessage());
+	}
+}
+
+/**
+ * Make a new Room
+ * 
+ * @param name	the room name
+ * @param maxU	the max users in that room
+ * @param u		the owner / creator of the room
+ * 
+ * @return		the new room obj
+ */
+private Room makeNewRoom(String name, int maxU, User u)
+{
+	Room newRoom = null;
+	
+	// Here we pass the room parameters
+	HashMap map = new HashMap();
+	map.put("name", name);
+	map.put("pwd", "");
+	map.put("maxU", String.valueOf(maxU));
+	map.put("maxS", "0");
+	map.put("isGame", "false");
+	
+	try
+	{
+		newRoom = helper.createRoom(zone, map, u, true, true);
+	}
+	catch(ExtensionHelperException ehe)
+	{
+		this.trace("Could not create room: " + name + ", Reason: " + ehe.getMessage());
+	}
+	
+	return newRoom;
+}
+</pre>
+
+
+
+	
+ <p>&nbsp;</p>
+<hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="mailer.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

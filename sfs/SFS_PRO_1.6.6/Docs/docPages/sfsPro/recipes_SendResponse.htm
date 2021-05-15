@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ 	<p class="title"><span class="subTitle"><a name="top" id="93"></a></span>6.x Java Extensions CookBook </p>
+	<p>
+		This document provides quick snippets of code organized by theme that will get you started with most of the
+		server side coding tasks. Feel free to suggest more "<em>recipes</em>" by sending us an email or posting in our <a href="http://www.smartfoxserver.com/forums" target="_blank">support forums</a></a>
+	</p>
+
+<p class="subTitle">&raquo; sendResponse() Recipes</p>
+<p>
+	The following recipes present various use cases of <strong>sendResponse()</strong> calls sending a message to a single user, group of users, an entire room, a group of rooms and an entire zone.
+	The method takes a list of recipients that can be assembled in many ways, as it is demonstrated in the code below. 
+</p>
+<p>
+	<strong>NOTE:</strong><br>
+	The List of recipients passed in the <strong>sendResponse()</strong> call is expected to contain SocketChannel objects, which represent the User session/connection.
+	You can obtain the session from a <strong>User</strong> object by invoking its <strong>getChannel()</strong> method.
+</p>
+
+<p class="buttonTitle"><strong>Recipe #1:</strong></p>
+<p>
+	This is the simplest possible sendResponse() invocation, where we send a message to a single recipient (the user who sent the original request). 
+	The example performs a simple arithmetic operation (a sum) on two numbers (x,y) sent by the client.
+</p>	
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+Zone currentZone;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+}
+
+public void handleRequest(String cmd, ActionscriptObject asObj, User user, int fromRoom)
+{
+	if (cmd.equals("sum"))
+	{
+		int x = asObj.getInt("x");
+		int y = asObj.getInt("y");
+		
+		ActionscriptObject response = new ActionscriptObject();
+		response.put("_cmd", "sum");
+		response.put("sum", x + y);
+		
+		// Prepare the list of recipients, in this case we only one.
+		LinkedList&lt;SocketChannel&gt; recipientList = new LinkedList&lt;SocketChannel&gt;();
+		recipientList.add(user.getChannel());
+
+		// Send response
+		sendResponse(response, -1, null, recipientList);
+	}
+}	
+</pre>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+
+<p class="buttonTitle"><strong>Recipe #2:</strong></p>
+<p>
+	In this recipe we show how to send a response to a selection of users: in this case we select all users in the current Room and send a message
+	only to those with certain user variables.
+</p>	
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+Zone currentZone;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+}
+
+public void handleRequest(String cmd, ActionscriptObject asObj, User user, int fromRoom)
+{
+	if (cmd.equals("sum"))
+	{
+		int x = asObj.getInt("x");
+		int y = asObj.getInt("y");
+		
+		ActionscriptObject response = new ActionscriptObject();
+		response.put("_cmd", "sum");
+		response.put("sum", x + y);
+		
+		// Select recipients
+		Room currentRoom = currentZone.getRoom(fromRoom);
+		LinkedList&lt;SocketChannel&gt; recipientList = new LinkedList&lt;SocketChannel&gt;();
+		
+		for (User u : currentRoom.getAllUsers())
+		{
+			if (u.getVariable("status").getValue().equals("ok"))
+				recipientList.add(u.getChannel());
+		}
+		
+		// Send response
+		sendResponse(response, -1, null, recipientList);
+	}
+}	
+</pre>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #3:</strong></p>
+<p>
+	In this recipe we show how to send a message to all users in a room with the exception of the sender.
+</p>
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+Zone currentZone;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+}
+
+public void handleRequest(String cmd, ActionscriptObject asObj, User user, int fromRoom)
+{
+	if (cmd.equals("sum"))
+	{
+		int x = asObj.getInt("x");
+		int y = asObj.getInt("y");
+		
+		ActionscriptObject response = new ActionscriptObject();
+		response.put("_cmd", "sum");
+		response.put("sum", x + y);
+		
+		// Select recipients
+		Room currentRoom = currentZone.getRoom(fromRoom);
+		LinkedList&lt;SocketChannel&gt; recipientList = new LinkedList&lt;SocketChannel&gt;();
+		
+		Room currentRoom = currentZone.getRoom(fromRoom);
+		for (User u : currentRoom.getAllUsersButOne(user))
+		{
+			recipientList.add(u.getChannel())
+		}
+		
+		// Send response
+		sendResponse(response, -1, null, recipientList);
+	}
+}	
+</pre>
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #4:</strong></p>
+<p>
+	The following example shows how to select the recipients from a group of Rooms. We send the message to all users in any Room whose name starts with the word &quot;game&quot;
+</p>
+
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+Zone currentZone;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+}
+
+public void handleRequest(String cmd, ActionscriptObject asObj, User user, int fromRoom)
+{
+	if (cmd.equals("sum"))
+	{
+		int x = asObj.getInt("x");
+		int y = asObj.getInt("y");
+		
+		ActionscriptObject response = new ActionscriptObject();
+		response.put("_cmd", "sum");
+		response.put("sum", x + y);
+		
+		// Select recipients
+		Room currentRoom = currentZone.getRoom(fromRoom);
+		LinkedList&lt;SocketChannel&gt; recipientList = new LinkedList&lt;SocketChannel&gt;();
+		
+		for (Room room : currentZone.getRoomList())
+		{
+			if (room.getName().startsWith("game"))
+			{
+				for (User u : room.getAllUsers())
+				{
+					recipientList.add(u.getChannel());
+				}
+			}
+		}
+		
+		// Send response
+		sendResponse(response, -1, null, recipientList);
+	}
+}	
+</pre>
+
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #5:</strong></p>
+<p>
+	The following example shows how to send a message to all users in the Zone.
+</p>
+
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+Zone currentZone;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+}
+
+public void handleRequest(String cmd, ActionscriptObject asObj, User user, int fromRoom)
+{
+	if (cmd.equals("sum"))
+	{
+		int x = asObj.getInt("x");
+		int y = asObj.getInt("y");
+		
+		ActionscriptObject response = new ActionscriptObject();
+		response.put("_cmd", "sum");
+		response.put("sum", x + y);
+		
+		// Select recipients
+		Room currentRoom = currentZone.getRoom(fromRoom);
+		
+		// Send response: getAllUsersInZone() returns all the SocketChannels for the current zone
+		sendResponse(response, -1, null, currentZone.getAllUsersInZone());
+	}
+}	
+</pre>
+
+	
+<p>&nbsp;</p>
+<hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="mailer.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

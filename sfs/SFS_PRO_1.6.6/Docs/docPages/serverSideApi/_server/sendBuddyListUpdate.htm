@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>SmartFoxServer Documentation</title>
+<link href="../../../api.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="plain">
+ <p class="itemName">_server.sendBuddyListUpdate()</p>
+ <p class="title">Availability:</p>
+ <p class="plain">SmartFoxServer PRO 1.6.0 </p>
+ <p class="title">Usage:</p>
+ <p class="plain">_server.sendBuddyListUpdate(user)</p>
+ <p class="title">Description:</p>
+<p class="plain">
+	Send an update about the specified User to all clients that have him/her in their buddy list.<br>
+	Normally you don't need to call this method. Updates are sent automatically when needed.<br>
+	You may need to force an update if you're manipulating the buddy lists without using the regular commands (add, remove, etc...)
+</p>
+<p>
+	For a complete overview of the <strong>Buddy List 2.0</strong> system introduced in version 1.6 check <a href="../../sfsPro/buddyList2.htm" target="blank">this document.</a>
+</p>
+<p class="title">Properties:</p>
+ <table  border="0" cellspacing="0" cellpadding="3">
+   <tr>
+     <td valign="top" nowrap="nowrap">
+		<strong>user</strong>
+	</td>
+     <td>&nbsp;</td>
+     <td>a User object that should receive the update</td>
+   </tr>
+ </table>
+ <p class="title">Returns:</p>
+ <p class="plain">nothing, it will fire and <strong>onBuddyListUpdate</strong> event on the client side.</p>
+ <p class="title">Example:</p>
+<pre class="code">
+// Send a buddy list update to an existing user
+_server.sendBuddyListUpdate(user)
+</pre>
+<br /> 
+<p class="plain"><span class="title">See also:</span></p>
+ <p class="plain"><strong></strong></p>
+ <p class="plain">addBuddy(), removeBuddy()</p>
+</body>
+</html>

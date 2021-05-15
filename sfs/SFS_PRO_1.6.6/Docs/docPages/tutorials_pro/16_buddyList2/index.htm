@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../../lib.js"></script>
+<link href="../../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ <p class="title">8.16 Example: Buddy List 2.0</p>
+ <table width="300" border="1" align="right" cellpadding="4" cellspacing="0" bordercolor="#999999">
+   <tr>
+     <td align="right" bgcolor="#f4f4f4">The <strong>source</strong> of 
+       this example is found under the <strong>Examples/AS2/24_pro_buddyList2</strong> folder. <br>
+       The example is also provided for Flash CS3 and Actionscript 3</strong> </td>
+   </tr>
+ </table>
+
+	<p class="subTitle">&raquo; Introduction</p>
+	<p>
+		The sample application demonstrates the new capabilities offered by the <strong>Buddy List 2.0</strong> introduced
+		with <strong>SmartFoxServer 1.6</strong>
+	</p>
+	<p>
+		A detailed tour of the new features is <a href="../../sfsPro/buddyList2.htm">found in this article.</a>
+	</p>
+	
+	<p class="subTitle">&raquo; The application</p>
+	<p>
+		When the application is launched you will be able to type a user name under which you will join the Zone.<br>
+		You are free to use any name as there is no server side login handler or checks: the easiest way to check the 
+		application is to run 2 or more instances of it and logging in with different names.
+	</p>
+	<img src="images/app_as3.png" width="600" height="461" alt="App As3" class="imgBorder">
+	<p>
+		The leftmost table contains your buddy list, which will probably be empty when you first check the application. 
+		It contains three columns:
+		<ul>
+			<li><strong>name</strong>: the name of the buddy.</li>
+			<li><strong>online</strong>: the online status of the buddy.</li>
+			<li><strong>x</strong>: the blocked status of the buddy. (If he's blocked he won't be able to message you)</li>
+		</ul>
+		The next table will show all the buddy variables for the currently selected buddy.
+	</p>
+	<p>&raquo; <strong>Adding a buddy to the buddy list</strong>:<br>
+		Simply type the name (respecting the case) in the field at the bottom left and click the <strong>Add Buddy</strong> button
+	</p>
+	<p>&raquo; <strong>Removing a buddy from the buddy list</strong>:<br>
+		Select the buddy in the leftmost table and click the <strong>Remove Buddy</strong> button.
+	</p>
+	<p>&raquo; <strong>Blocking a buddy</strong>:<br>
+		Select the buddy in the leftmost table and click the <strong>Block Buddy</strong> button.
+	</p>
+	<p>&raquo; <strong>Unblocking a buddy</strong>:<br>
+		Select the buddy in the leftmost table and click the <strong>Unblock Buddy</strong> button.
+	</p>
+	<p>&raquo; <strong>Setting the buddy variables</strong>:<br>
+		Type the name (key) and value in the fields below the variables table and click <strong>Save Variable</strong>. 
+		In order to check the new variable check another instance of the application in which the buddy was added.<br>
+		If you use a <strong>$</strong> (dollar) sign as the first character of the Buddy Variable name it will be detected as off-line buddy variable.
+	</p>
+	<p>&raquo; <strong>Sending messages</strong>:<br>
+		You can send private messages to any buddy in your list provided that they are not blocked. In order to send a message select a buddy in the
+		buddy list, type your message in the relative text field and hit the <strong>Send</strong> button.
+	</p>
+
+ 	<p class="subTitle">&raquo; Add Buddy Permissions</p>
+	<p>
+		When a <strong>&quot;Add Buddy</strong>&quot; request is sent using the new Buddy List 2.0, the target buddy will receive
+		the request and will be able to grant it or refuse it.
+		A new event was introduced in <strong>SmartFoxServer 1.6</strong> client API called <strong>onBuddyPermissionRequest</strong> 
+		and also a new method, <strong>sendBuddyPermissionResponse</strong>, was added send a response back.
+	</p>
+	<img src="images/alert.png" width="422" height="136" alt="Alert" class="imgBorder">
+	
+	<p class="subTitle">&raquo; Compatibility with previous Buddy List system</p>
+	<p>
+		The previous buddy list system is still present in <strong>SmartFoxServer</strong> for compatibility with previous applications.
+		However, the advantages of the new system are not only a richer set of features with many customizable options, but also a <strong>better overall performance</strong>: 
+		in fact while the first system was file-based, the new <strong>Buddy List 2.0</strong> uses a lightning fast embedded database.
+	</p>
+	
+	<p class="subTitle">&raquo; Code changes</p>
+	<p>
+		Even if the <strong>Buddy List 2.0</strong> introduces many new features we strived to maintain the client API as simple as possible keeping the compatibility
+		with the previous system. You will find that the Buddy List API have the same previous features with some nice new additions:
+		<ul>
+			<li><strong>Buddy</strong> object has a new <strong>isBlocked</strong> property which indicates if the buddy is black-listed.</li>
+			<li>New <strong>onBuddyPermissionRequest</strong> event allows to handle &quot;Add Buddy&quot; requests.</li>
+			<li>New <strong>sendBuddyPermissionResponse</strong> method allows to grant/deny the &quot;Add Buddy&quot; request.</li>
+			<li>New <strong>setBuddyBlockStatus</strong> method allows to block/unblock buddies.</li>
+		</ul>
+	</p>
+	
+<hr width="99%" size="1" noshade>
+<table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%">&nbsp;</td>
+    <td width="34%" align="center"><a href="../../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

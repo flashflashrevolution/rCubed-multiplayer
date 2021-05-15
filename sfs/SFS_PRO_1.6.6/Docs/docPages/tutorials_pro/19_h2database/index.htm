@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<title>SmartFoxServer: Actionscript 3 - Socket File Loader</title>
+		<script language="javascript" src="../../../lib.js"></script>
+		<link href="../../../main.css" rel="stylesheet" type="text/css">
+	</head>
+
+<body class="bodyStyle">
+	<p class="title">8.19 H2 Embedded database tutorial</p>
+	
+	<!-- ::::::: INTRO ::::::: -->
+	<p>
+		In this tutorial we will quickly guide you through the simple steps of connecting and interacting with the
+		embedded <strong>H2 Database Engine</strong> coming with <strong>SmartFoxServer 1.6</strong>
+	</p>
+	<p>
+		If you're not familiar with the configuration of a database connection using SmartFoxServer, we highly recommend that you
+		check the relative tutorials:
+		<ul>
+			<li>
+				<a href="../../sfsPro/databaseConnection.htm" id="" title="databaseConnection">Connecting to databases</a>
+			</li>
+			<li>
+				<a href="../../sfsPro/embeddedDb.htm" id="" title="embeddedDb">Embedded H2 database engine</a>
+			</li>
+		</ul>
+	</p>
+	
+	<p class="subTitle">&raquo; Zone configuration</p>
+	<p>
+		This is how the <strong>DatabaseManager</strong> should be configured to access the H2 embedded server:
+	</p>
+<pre class="serverCode">
+&lt;Zone name=&quot;h2db&quot; customLogin=&quot;false&quot;&gt;
+	&lt;AutoReloadExtensions&gt;true&lt;/AutoReloadExtensions&gt;
+	
+	&lt;Rooms&gt;
+		&lt;Room name=&quot;Lobby&quot; maxUsers=&quot;10&quot; isPrivate=&quot;false&quot; isTemp=&quot;false&quot; autoJoin=&quot;true&quot; /&gt;
+	&lt;/Rooms&gt;
+	
+	&lt;DatabaseManager active=&quot;true&quot;&gt;
+		&lt;Driver&gt;org.h2.Driver&lt;/Driver&gt;
+		&lt;ConnectionString&gt;jdbc:h2:tcp://localhost:9009/examples&lt;/ConnectionString&gt;
+		
+		&lt;UserName&gt;sa&lt;/UserName&gt;
+		&lt;Password&gt;&lt;/Password&gt;
+		
+		&lt;TestSQL&gt;&lt;![CDATA[SELECT COUNT(*) FROM retrocomputers]]&gt;&lt;/TestSQL&gt;
+		
+		&lt;MaxActive&gt;10&lt;/MaxActive&gt;
+		&lt;MaxIdle&gt;10&lt;/MaxIdle&gt;
+		
+		&lt;OnExhaustedPool&gt;fail&lt;/OnExhaustedPool&gt;
+		&lt;BlockTime&gt;5000&lt;/BlockTime&gt;
+	&lt;/DatabaseManager&gt;
+	
+	&lt;Extensions&gt;
+		&lt;extension name=&quot;h2db_ext&quot;  className=&quot;internalDbDemo.as&quot; type=&quot;script&quot; /&gt; 
+	&lt;/Extensions&gt;
+&lt;/Zone&gt;	
+</pre>
+	<p>
+		The connections string: <strong>jdbc:h2:tcp://localhost:9009/examples</strong> specifies that we want to connect
+		via TCP on port 9009 to a database called <strong>examples</strong>.
+	</p>
+	<p>
+		In the tutorial we will be working with a table called <strong>retrocomputers</strong> which catalogues a few popular
+		personal computers of the 8-bit generation (early 80's).
+	</p>
+	<p>
+		The table is made up of 5 fields called: <strong>ID, BRAND, MODEL, CPU, RAM</strong> and it was created using the following SQL code:
+	</p>
+	<pre class="serverCode">
+CREATE TABLE retrocomputers (
+	ID INT AUTO_INCREMENT PRIMARY KEY, 
+	BRAND VARCHAR(120), 
+	MODEL VARCHAR(200), 
+	CPU VARCHAR(100), 
+	RAM VARCHAR(50)
+)
+	</pre>
+	
+	<p class="subTitle">&raquo; New RecordSet serialization</p>
+	<p>
+		<strong>SmartFoxServer 1.6</strong> introduces new features in the <strong>ActionscriptObject</strong> class which is used by the Java framework to &quot;simulate&quot;
+		actionscript objects in Java. The class is also used behind the scenes in both <strong>Actionscript</strong> and <strong>Python</strong> extensions to serialize 
+		and deserialize complex data sent to the client.
+	</p>
+	<p>
+		The new version allows to directly serialize Java <strong>Collections</strong>, <strong>Maps</strong> and <strong>ResultSets</strong> coming from a database query.
+	</p>
+	<p>
+		In the following code you will notice how simple is to send a <strong>ResultSet</strong> to the client side which immediately passes the same object as
+		the <strong>dataProvider</strong> to a <strong>DataGrid</strong> UI component.
+	</p>
+	
+	<p class="subTitle">&raquo; The example application</p>
+	<img src="images/h2demo.png" width="544" height="398" alt="H2demo" class="imgBorder">
+	
+	<p>
+		By pressing the <strong>Connect</strong> button the user is logged into the zone as a guest user and auto-joined to default &quot;Lobby&quot; room.<br>
+		The <strong>Get Data!</strong> button will fire a simple request called &quot;<strong>getList</strong>&quot; to the server side extension:
+	</p>
+<pre class="code">
+smartfox.sendXtMessage("h2db_ext", "getList", {})
+</pre>
+	<p>
+		On the server side this code is executed:
+	</p>
+	
+<pre class="serverCode">
+function sendComputerList(user)
+{
+	var sql = "SELECT * FROM retrocomputers ORDER BY BRAND"		
+
+	if (queryRes != null)
+	{
+		var response = {}
+		response._cmd = "getList"
+		response.list = queryRes
+
+		_server.sendResponse(response, -1, null, [user])
+	}
+}
+</pre>	
+	<p>
+		You will notice that the amount of code necessary to prepare the response <strong>is reduced to the minimum</strong> and you don't have
+		to &quot;unroll&quot; the <strong>ResultSet</strong> object into an AS object in order to send it to the client(s).
+	</p>
+	<p>
+		Back on the client side (onExtensionResponse event) we simply receive the same <strong>list</strong> array and pass it as the <strong>dataProvider</strong> to the <strong>DataGrid</strong> component which
+		will be immediately populated. Piece of cake!
+	</p>
+<pre class="code">
+smartfox.onExtensionResponse = function(o:Object)
+{
+	if (o._cmd = "getList")
+		dg_computers.dataProvider = o.list
+}
+</pre>	
+
+	<p>&nbsp;</p>
+	
+	<hr width="99%" size="1" noshade>
+	<div align="center">
+		<a href="../../../index.htm" target="_top" class="navLinks">doc index </a>
+	</div>	
+</body>
+</html>

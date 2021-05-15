@@ -1,0 +1,309 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ 	<p class="title"><span class="subTitle"><a name="top" id="93"></a></span>6.x Java Extensions CookBook </p>
+	<p>
+		This document provides quick snippets of code organized by theme that will get you started with most of the
+		server side coding tasks. Feel free to suggest more "<em>recipes</em>" by sending us an email or posting in our <a href="http://www.smartfoxserver.com/forums" target="_blank">support forums</a></a>
+	</p>
+
+<p class="subTitle">&raquo; Login Recipes</p>
+<p>
+	By setting the <strong>customLogin</strong> attribute of a Zone to true you can handle the login event in your server side code. Upon login the server will first perform a series of checkes, like validating the user name and verifying that the user is not in the ban-list.
+	Once the checks are passed it will pass the user details to your server-side extension to handle the rest of the login process. Here you will be able to connect to your database or any other data source and perform your custom logic.
+</p>
+<div style="border: 1px dotted #cc0000; background-color:#ffffee; padding:10px;">
+  	<strong>NOTE:</strong>
+	<ul>
+		<li>
+				When using <strong>a regular login</strong>, the client will handle the login response via the <strong>onLogin</strong> event handler.
+				Behind the scenes the client API will assign the SmartFoxClient <strong>myUserName</strong> and <strong>myUserId</strong> properties.
+		</li>
+
+		<br>
+		<li>
+				When using <strong>a custom login</strong> the response is sent back to the client via the extension and it is handled in the <strong>onExtensionResponse</strong> 
+				handler. Also the <strong>myUserName</strong> and <strong>myUserId</strong> properties <strong>ARE NOT populated auto-magically</strong>, so you will need to do it manually, if you need them.
+
+		</li>
+
+	</ul>
+</div>
+
+
+<p class="buttonTitle"><strong>Recipe #1:</strong></p>
+<p>We perform a simple validation of the user name against a list of valid user names.</p>		
+<pre class="codeBlockServer">
+List&lt;String&gt; validNames;	
+ExtensionHelper helper;
+Zone currentZone;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+	
+	validNames = new ArrayList&lt;String&gt;();
+	validNames.add("Pierre");
+	validNames.add("Michelle");
+	validNames.add("Gunther");
+	validNames.add("Christine");
+	validNames.add("Nicole");
+}
+	
+public void handleInternalEvent(InternalEventObject evt)
+{
+	if (evt.getEventName().equals(InternalEventObject.EVENT_LOGIN))
+	{
+		boolean ok = false;
+		User newUser = null;
+		
+		// Prepare a response object for the client
+		ActionscriptObject response = new ActionscriptObject();
+		
+		// get the user nickname and password (not used in this example)
+		String nick = ieo.getParam("nick");
+		String pass = ieo.getParam("pass");
+		
+		// get the user socket channel
+		SocketChannel chan = (SocketChannel) ieo.getObject("chan");
+		
+		// validate user name
+		if (validNames.contains(nick))
+			ok = true;
+		
+		if (ok)
+		{
+			try
+			{
+				// Attempt to login the user in the system
+				newUser = helper.canLogin(nick, pass, chan, currentZone);
+
+				res.put("_cmd", "logOK");
+				res.put("id", String.valueOf(newUser.getUserId()));
+				res.put("name", newUser.getName());
+
+				ok = true;
+			}
+			
+			// An exception occurred while logging the user in
+			catch (LoginException le)
+			{
+				this.trace("Could not login user: " + nick);
+
+				res.put("_cmd", "logKO");
+				res.put("err", le.getMessage());
+			}
+		}
+		
+		// The user name is not among the valid ones
+		else
+		{
+			res.put("_cmd", "logKO");
+			res.put("err", "Sorry, your user name was not accepted.");
+		}
+		
+		// Prepare the list of recipients, in this case we only one.
+		LinkedList ll = new LinkedList();
+		ll.add(chan);
+
+		// Send login response
+		sendResponse(res, -1, null, ll);	
+
+		// Send room list
+		if (ok)
+			helper.sendRoomList(chan);
+	}
+}
+</pre>
+<p>
+	First we get the three parameters in the event object: nickname, password and socket channel. It is useful to remark that at this point the client attempting the login is still seen as simple <em>socket connection</em>, not a <strong>User</strong> yet.
+	The client will be promoted as <strong>User</strong> only after a successful login.
+</p>
+<p>
+	We then proceed by simply checking if the wanted user name is among those considered valid in our <em>validNames</em> list. 
+	If this is the case we proceed by logging in the user calling the <strong>canLogin()</strong> method from the <strong>ExtensionHelper</strong> class, which might throw a checked exception (LoginException).
+</p>
+<p>
+	Upon successful login we will send a <strong>logOK</strong> command to the client together with the user id and name. If anything goes wrong we will instead send a <strong>logKO</strong> command
+	together with an additional parameter (err) containing the error description.
+</p>
+<p>Now we can see how simple it is to handle the server response on the client side. (Actionscript 3)</p>
+
+<pre class="codeBlockClient">
+public function onExtensionResponse(evt:SFSEvent):void
+{
+	var params:Object = evt.params.dataObj
+	var cmd:String = params._cmd
+	
+	if (cmd == "logOK")
+	{
+		sfs.myUserId = params.id
+		sfs.myUserName = params.name
+
+		trace("Great, login was successful!")
+	}
+	else if (cmd == "logKO")
+	{
+		trace("Oops, login failed. Reason: " + params.err)
+	}
+}
+</pre>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #2:</strong></p>
+<p>
+	The following example is slight variation on the theme of the previous one. Instead of using a simple list of names we will use a connection to a database
+	and perform a full credential check against it.
+</p>
+<p>
+	Setting up a database connection is pretty straightforward as it is all done declaratively in the Zone setup, in your config.xml file. 
+	For more details on how to setup a database connection please refer to chapters <strong>6.3</strong> and <strong>6.4</strong> of the documentation.
+</p>
+
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+Zone currentZone;
+DbManager dbManager;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+	currentZone = helper.getZone(this.getOwnerZone);
+	dbManager = currentZone.dbManager;
+}
+	
+public void handleInternalEvent(InternalEventObject evt)
+{
+	if (evt.getEventName().equals(InternalEventObject.EVENT_LOGIN))
+	{
+		boolean ok = false;
+		User newUser = null;
+		
+		// Prepare a response object for the client
+		ActionscriptObject response = new ActionscriptObject();
+		
+		// get the user nickname and password
+		String nick = ieo.getParam("nick");
+		String pass = ieo.getParam("pass");
+		
+		// get the user socket channel
+		SocketChannel chan = (SocketChannel) ieo.getObject("chan");
+		
+		// validate user name
+		ok = checkCredentials(nick, pass);
+		
+		if (ok)
+		{
+			try
+			{
+				// Attempt to login the user in the system
+				newUser = helper.canLogin(nick, pass, chan, currentZone);
+
+				res.put("_cmd", "logOK");
+				res.put("id", String.valueOf(newUser.getUserId()));
+				res.put("name", newUser.getName());
+
+				ok = true;
+			}
+			
+			// An exception occurred while logging the user in
+			catch (LoginException le)
+			{
+				this.trace("Could not login user: " + nick);
+
+				res.put("_cmd", "logKO");
+				res.put("err", le.getMessage());
+			}
+		}
+		
+		// Invalid credentials
+		else
+		{
+			res.put("_cmd", "logKO");
+			res.put("err", "Sorry, invalid credentials.");
+		}
+		
+		// Prepare the list of recipients, in this case we only one.
+		LinkedList ll = new LinkedList();
+		ll.add(chan);
+
+		// Send login response
+		sendResponse(res, -1, null, ll);	
+
+		// Send room list
+		if (ok)
+			helper.sendRoomList(chan);
+	}
+}
+
+// Here we execute the check on the database
+boolean checkCredentials(String name, String pass)
+{
+	boolean result = false;
+	
+	// Escape quotes on passed data
+	name = SmartFoxLib.escapeQuotes(name);
+	pass = SmartFoxLib.escapeQuotes(pass);
+	
+	// SQL statement to execute
+	String sql = "SELECT id,name,pass FROM registered_users WHERE" + 
+				"name='" + name "'" + 
+				"AND pass='" + pass + "'";
+	
+	// Execute the SQL statement
+	ArrayList queryRes = dbManager.executeQuery(sql);
+		
+	// If record was found exist...
+	if (queryRes != null &amp;&amp; queryRes.size() &gt; 0)
+	{
+		result = true;
+	}	
+		
+	return result;
+}
+
+</pre>
+<p>
+	As you can see the code is pretty much the same of <strong>Recipe #1</strong> and we have added a new method, checkCredentials(), which
+	takes care of the database details. In the first lines we make sure to escape the data passed by the user in order to avoid problems with the SQL syntax.
+	We then build the query and run it via the <strong>dbManager</strong> object.
+</p>
+<p>
+	The client code for handling the server response is the same as in Recipe #1.
+</p>
+<p>
+	<strong>NOTE:</strong> Sometimes it is useful to store the database id of the user for later usage in your extension.<br>
+	It&#x27;s usually not a good idea to transmit this id on the client side. It would be much better to keep it on the server side and access it from the <strong>User</strong> object when needed.
+	In order to do so each <strong>User</strong> object exposes a <strong>properties</strong> field of type <em>java.util.Map</em> that can be used to store any data related to the current session of the user.
+</p>
+<p>This code stores the database id in the User object:</p>
+<pre class="codeBlockServer">
+	userObj.properties.put("dbId", dbId);
+</pre>
+<p>This code retrieves the database id in the User object:</p>
+<pre class="codeBlockServer">
+	int dbId = (Integer) userObj.properties.get("dbId");
+</pre>
+	
+ <p>&nbsp;</p>
+<hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="mailer.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

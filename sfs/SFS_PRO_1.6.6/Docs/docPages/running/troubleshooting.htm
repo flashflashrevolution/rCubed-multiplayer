@@ -1,0 +1,222 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+	<p class="title">3.6 Troubleshooting common runtime problems</p>
+	
+ 	<p class="subTitle">&raquo; Introduction </p>
+	<p>
+		In this article we are going to discuss several common runtime issues you might encounter while running SmartFoxServer that can be usually solved with a few changes in your configuration, JVM setup or server settings. <br>
+	</p>
+ 	
+
+	<!-- 1. Connectivity problems -->
+	<p class="subTitle">&raquo; Problems connecting to the server.</p>
+	<p>
+		Among the common help requests we receive there is the inability to connect or reach the production server once the application goes live
+		for the first tests. There are a couple of &quot;popular&quot; pitfalls that are often overlooked and that can cause a few headaches:
+		<ul>
+			<li>Server side firewall/nat configuration issues</li>
+			<li>Flash Player security restrictions</li>
+			<li>Client side firewall or connection problems</li>
+		</ul>
+	</p>
+	
+	<p><strong>&raquo; Firewall and Nat: </strong></p>
+	<p>
+		Once your SmartFoxServer instance is up and running on your server machine at the hosting center you should make sure with the 
+		system administrator that there is no <a href="http://en.wikipedia.org/wiki/Firewall" target="_blank" title="Firewall - Wikipedia, the free encyclopedia">firewall</a> blocking TCP connections. 
+		If this is the case you should ask the admin to open the <strong>TCP ports</strong> you are using (default = 9339 and 8080 for the BlueBox) to &quot;the world&quot;.
+		<br><br>
+		If your server is not connected directly to the internet you should also make sure that the <a href="http://en.wikipedia.org/wiki/Network_address_translation" target="_blank" title="Network address translation - Wikipedia, the free encyclopedia">NAT service</a> on the router you are connected to is configured correctly.<br>
+		The <strong>NAT service</strong> allows to expose one or more services from your computer to the public internet address. For example a well configured router will send all traffic coming to port 9339 (SFS's default) to the server machine running SmartFoxServer.
+		<br><br>
+		In order to determine if something is blocking your server at the &quot;hosting level&quot; you can try telnetting its public address from outside. 
+		Telnet is a command-line utility found on most operating systems that allows to establish a TCP connection to a remote host.
+		Follow these steps to test the connection to your server:
+		
+		<ul>
+			<li>
+				Open the system console:
+				<ul>
+					<li>Under <strong>Windows</strong> use <strong>Windows Key + R</strong> and then type <strong>cmd</strong> in the dialogue box that appears</li>
+					<li>Under <strong>MacOS X</strong> the terminal is found in <strong>/Applications/Utilities/Terminal</strong></li>
+					<li>Under <strong>Linux</strong>... well, every Linux user knows how to launch a terminal!</li>
+				</ul>
+			</li>
+			<br>
+			<li>
+				Type the following:
+				<pre class="code" style="width:300px">telnet 10.20.30.40 9339</pre>
+			</li>
+			<br>
+			<li>You should get something like this:
+				<pre class="serverCode">
+Lapo$ telnet localhost 9339
+Trying ::1...
+Connected to localhost.
+Escape character is '^]'.
+&lt;cross-domain-policy&gt;&lt;allow-access-from domain=&#x27;*&#x27; to-ports=&#x27;9339&#x27; /&gt;&lt;/cross-domain-policy&gt;</pre>
+			This is the server accepting the connection and responding with the Flash cross-domain policy.<br>
+			If the connection fails you should make sure that no firewall is blocking the port(s) you are using. Additionally you should also check with the admin that the NAT, if any, is properly configured.
+			</li>
+		</ul>
+	</p>
+
+	<p><strong>&raquo; Flash Player security restrictions: </strong></p>
+	<p>
+		If the server is reachable at its public address but you are still having connection problems, you should make sure that you are not incurring in any
+		Flash player sandbox restrictions. For security reasons the Flash Player does not allow connecting to external domains without setting explicit permissions via
+		a cross domain policy file.
+	</p>
+	
+	<p>You can learn more about the Flash Player security settings in <a href="http://www.smartfoxserver.com/whitepapers/fp_security/index.html" title="SmartFoxServer documentation" target="_blank">this white-paper</a>.</p>
+	
+	
+	<p><strong>&raquo; Client side firewall or connection problems:</strong></p>
+	<p>
+		The last case is when a specific user or group of users are not able to reach the server besides the aforementioned possible issues.<br>
+		In this case it is highly likely that the clients are under restricted network conditions: for example they run a personal firewall that blocks socket
+		connections to SmartFoxServer, or their connection passes through a proxy server which doesn't allow a point-to-point connection. 
+	</p>
+	<p>
+		In all these cases the <strong>SmartFoxServer BlueBox</strong> can come to rescue. The <strong>BlueBox</strong> is an add-on specifically designed 
+		to bypass these restrictions and allow users to fully enjoy any SmartFoxServer-based game and MMO.
+	</p>
+	<p>You can learn all the details about the BlueBox by visiting <a href="http://www.smartfoxserver.com/products/blueBox.php" target="_blank" title="Multiplayer Socket Server :: BlueBox :: firewall and proxy traversal">this section of our website</a>.</p>
+	
+	
+	
+
+	<!-- 2. Dropped Messages -->
+	<img src="images/drop-msg.gif" align="right" alt="Dropped messages" class="imgBorder">
+	<p class="subTitle">&raquo; Understanding Dropped Messages.</p>
+	<p>
+		Among the questions asked in our support board many revolve around the topic of <em>dropped messages</em>. 
+		At times you might notice a very high count from the <strong>Admin Tool</strong> especially for the <em>outgoing dropped messages</em>.
+	</p>
+	<p>
+		The <strong>Incoming Dropped Messages</strong> are very simple to explain: requests are never dropped unless their size is greater than the <strong>&lt;MaxMsgLen&gt;</strong> setting: 
+		this allows to put a limit to the size of incoming data and discard any other message with a larger size.
+	</p>
+	<p>
+		The <strong>Outgoing Dropped Messages</strong> value keeps a count of the server responses that were not sent to their respective recipients.<br>
+		Before discussing the possible reasons for dropping a message, let's take a look at the following diagram:
+	</p>
+	<img src="images/queues.png" alt="outgoing queue" class="imgBorder">
+	<p>
+		The server associate an <strong>outgoing message queue</strong> to each connected user in order to store data that cannot be written immediately.
+		In fact the server attempts to deliver each response as quick as possible, but there can be times in which the socket connection is congested and refuses to get more data for a specific client.<br>
+		In this case the server can only store the remaining bits of data in the queue and wait for the <strong>network pipe</strong> to become available again for receiving data.
+	</p>
+	<p>
+		According to the user configuration, <strong>SmartFoxServer</strong> will keep data in each queue until its capacity is exhausted: at that point messages are dropped. This mechanism allows
+		the server to protect itself from indefinite memory allocation which might eventually end up in a crash of the Java VM.
+	</p>	
+	<p>Here&#x27;s an example of the server configuration settings:</p>
+	
+	<pre class="serverCode">
+&lt;ClientMessagQueue&gt;
+	&lt;QueueSize&gt;120&lt;/QueueSize&gt;
+	&lt;MaxAllowedDroppedPackets&gt;3&lt;/MaxAllowedDroppedPackets&gt;
+&lt;/ClientMessagQueue&gt;
+	</pre>
+	
+	<p>
+		With these settings the server allocates a queue of 120 messages for each client and allows a tolerance of three dropped messages before disconnecting the client. 
+		In general dropping messages is a never a good thing as the user might loose one important packet of data that leaves him out of synch with the rest of the players. For
+		this reason we usually recommend to fine the tune queue size and allow very few dropped packets before disconnecting the client. (Ideally the threshold should be == 1)
+	</p>
+	
+	<p>
+		<strong>&raquo; What are the causes of dropped outgoing messages?</strong>
+	</p>
+	<ul>
+		<li>
+			<strong>Bad or slow client connection:</strong> the user has a slow response time and not enough bandwidth to keep up with the server responses. This causes the socket to become busy very soon and forces the server to keep the data in the queue.
+		</li>
+		<br>
+		<li>
+			<strong>Too much data being sent too frequently:</strong> this is a slight variation on the previous theme. Only this time we can not necessarily blame the client connection but it is
+			probably depending on the server logic sending too large data or too frequent updates. It is important to remember that over the internet every connection experiences a certain
+			amount of latency which usually varies between 50 to 200 milliseconds, but it can also reach several seconds.<br><br>
+			
+			It is important to keep in mind these limitations and work around them with specific client and server algorithms to reduce the lag. In general it is not recommended
+			to send more than 10-20 updates per second, unless you're in a local network.<br><br>
+			
+			We also suggest to use the string-protocol to reduce the packet size to the minimum and for fast updates (e.g. player position updates in real-time action games)<br><br>
+			
+			If you are interested into learning more about network lag <a href="http://www.gamedev.net/reference/articles/article712.asp" target="_blank" title="GameDev.net - What is Lag?">we suggest to read this article</a>.
+		</li>
+		<br>
+		<li>
+			<strong>Lack of bandwidth on the server side:</strong> as you reach the capacity of your hosting bandwidth you will experience a general slow down of the network performance. Your players
+			will probably start to complain about the game or application getting slower and you should see a rising number of dropped messages.
+			<br><br>
+			You can easily detect this issue by monitoring your bandwidth usage on a daily basis. 			
+		</li>
+	</ul>
+	
+	<!-- 3. Ghost Connections -->
+	<img src="images/outlet.jpg" alt="socket connection" class="imgBorder" align="right" style="margin-left:6px">
+	<p class="subTitle">&raquo; Ghost connections.</p>
+	<p>
+		Ghost connections are the result of an incomplete socket disconnection which is not acknowledged by the server and can result in a few different problems: 
+		re-connecting users be refused because the server thinks that they are still online, the other players in the room will still see the disconnected user
+		online etc...
+	</p>
+	<p>
+		In reality these pending connections <strong>are not fully closed</strong>, the TCP stack is still holding them and it's likely that several minutes will pass before the TCP timeout
+		is fired and the connections are finally closed. When this happens the JVM is informed and finally SmartFoxServer can remove the owners of those connections.
+	</p>
+	<p>
+		The causes behind these &quot;bad disconnections&quot; can be multiple: an abrupt internet disconnection, the network cable being pulled, a crash in the browser or Flash plugin,
+		a disconnection happening from a very slow and problematic connection, etc...
+	</p>
+	
+	<p>Since this problem is not avoidable <strong>SmartFoxServer</strong> provides several tools to deal with it:</p>
+	<ul>
+		<li>
+			<strong>&lt;MaxIdleTime&gt; setting:</strong>
+			Allows you to specify the maximum amount a client can stay idle (not sending any requests) before being auto-disconnected.<br>
+			The server continuously monitors the connected user activity and attempts to kick the idle ones, including ghost-connections.
+		</li>
+		<br>
+		<li>
+			<strong>&lt;MaxSocketIdleTime&gt; setting:</strong>
+			This is similar to the previous one but it controls only those socket connections that haven't performed any login yet. 
+			This is useful for getting rid of idle connections coming from bots or any other &quot;automated spiders&quot; that scans the web for attackable services.
+		</li>
+		<br>
+		<li>
+			<strong>force login option:</strong>
+			Since SmartFoxServer PRO 1.6.3 we have introduced an extra &quot;force login&quot; flag in the server side <strong>login()</strong> method
+			that forces the sudden disconnect of a previous user when the same client is logging in again.
+		</li>
+		<br>
+		<li>
+			<strong>manual disconnection:</strong>
+			If it's a matter of only a few ghost users you can try to disconnect them manually using the <strong>SmartFoxServer Admin Tool</strong>.
+		</li>
+	</ul>
+	
+	<p>&nbsp;</p>
+	
+	<hr width="99%" size="1" noshade>
+	<table width="99%"  border="0" cellspacing="0" cellpadding="4">
+	  <tr>
+	    <td width="33%"><a href="../config/advanced.htm" class="navLinks"></a> </td>
+	    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+	    <td width="33%" align="right"><a href="logs.htm" class="navLinks"></a></td>
+	  </tr>
+	</table>
+
+</body>
+</html>

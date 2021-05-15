@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ 	
+	<!-- ::::::: INTRO ::::::: -->
+	<p class="title">6.11 Extension Interoperability</p>
+ 	<p>
+		<strong>SmartFoxServer 1.6</strong> introduces a new simple and effective way to make <strong>server side extensions more interoperable</strong> 
+		between them and from other objects.
+	</p>
+	<p>A new method called <strong>handleInternalRequest</strong> is now part of the Extension interface:</p>
+	<pre class="serverCode">
+public Object handleInternalRequest(Object object)
+{
+	// Can be any type
+	Object someObject;
+	
+	/*
+	* ...
+	* body of the method
+	* ...
+	*/
+
+	return someObject;
+}
+	</pre>
+ 	<p>
+		With this new <strong>optional</strong> method each extension is now capable of receiving method calls from any object, 
+		be it another extension, a servlet running in the embedded webserver, another object, etc...
+	</p>
+	<p>
+		Additionally the same method exists for <strong>Actionscript</strong> and <strong>Python</strong> extensions making it possible to 
+		implement cross-communication between Extensions written in different languages and even running in different Zones.
+	</p>
+	<p>
+		Here's a snippet of Java code that demonstrates how an extension can perform a <strong>request to another running extension</strong>:
+	</p>
+	<pre class="serverCode">
+// Get a reference to the Zone where the target extension is running
+Zone zone = SmartFoxServer.getInstance().getZone("testZone");
+
+// Get a reference to the Extension we want to call 
+AbstractExtension targetExtension = zone.getExtension("testExtension");
+
+// Invoke the handleInternalRequest on the target extension and receive the response
+String response = (String) targetExtension.handleInternalRequest("Hello");
+
+trace("Response: " + response);
+	</pre>
+<p>
+	And this is what the target extension <strong>handleInternalRequest</strong> method could look like:
+</p>
+<pre class="serverCode">
+public Object handleInternalRequest(Object object)
+{
+	String message = (String) object;
+	
+	if (message.equals("Hello"))
+	{
+		return "Hello to you!"
+	}
+	else
+	{
+		return "Unrecognized message."
+	}
+}
+</pre>
+
+	<!-- ::::::: WEBSERVER INTEROP ::::::: -->
+	<p class="subTitle">&raquo; Extension monitoring and debugging</p>
+	<p>
+		Another important aspect of the new interoperability feature is the ability to easily create custom <strong>debuggers</strong> and <strong>admin tools</strong> for your extensions.
+		For example you can quickly create a remote debugger by running a <strong>dynamic web-page</strong> in the embedded web-server which in turn sends commands to your extension(s) and outputs its responses.
+	</p>
+	
+	<!-- ::::::: CROSS LANGUAGES ::::::: -->
+	<p class="subTitle">&raquo; Using different server languages</p>
+	<p>
+		Since SmartFoxServer supports multiple languages on the server side it may become a little complicated to pass objects to and from extensions
+		written in different languages. In order to reduce type-compatibility problems we suggest to <strong>always use Java types</strong> as arguments and return types,
+		when invoking the <strong>handleInternalRequest</strong>() method.
+	</p>
+	<p>
+		For example, if you wish to send a list of strings from an Actionscript extension to a Java extension, you should use a Java <strong>ArrayList</strong> or <strong>LinkedList</strong>
+		instead of a native Actionscript array.<br>
+		Similarly you should return a <strong>Java type</strong> from the target extension which can be easily handled by the calling Actionscript code.
+	</p>
+	<p>
+		<strong>NOTE:</strong> There is one particular case in which you should pay attention at how Objects are passed via the <strong>handleInternalRequest()</strong> method.
+		The "special case" is when <strong>returning Java objects from an Actionscript</strong> extension.<br>
+		In this case the Java object is "wrapped" in a special object and would cause a java <strong>ClassCastException</strong> if you try to cast it to the expected type.
+	</p>
+	<p>
+		Luckily the "wrapping" object exposes an <strong>unwrap()</strong> method which allows to retrieve the original object and finally cast it to the wanted type.
+	</p>
+	<blockquote>
+		A code example will probably help understanding. Suppose we're calling an Actionscript extension who's expected to return a String.
+		Here's the java code we would use:<br><br>
+		<pre class="serverCode">
+public void callASExtension()
+{
+	Zone zone = SmartFoxServer.getInstance().getZone("testZone"); 
+	AbstractExtension targetExtension = zone.getExtension("asExtension");
+
+	// The object we get back is still the "wrapper" object
+	Object responseObj = targetExtension.handleInternalRequest("Hello");
+	
+	// Finally we unwrap the object and cast it to the expected type
+	String response = (String) responseObj.unwrap();
+
+	trace("Response: " + response);
+}
+		</pre>
+		
+	<p>As you can see you only need to remember to call the <strong>unwrap()</strong> method before casting the object.</p>
+	</blockquote>
+
+
+	<!-- ::::::: WEBSERVER USAGE ::::::: -->
+	<p class="subTitle">&raquo; Servlet example</p>
+	<p>
+		Calling running extensions from a <strong>web-server servlet</strong> is also very easy. The following example shows how simple is to write
+		a <strong>Python servlet</strong> that talks to an extension. In this case the target extension is also implemented in Python, so that object exchange is not a concern.
+	</p>
+	<p>
+		In our example the servlet will accept an external <strong>command</strong> parameter passed via the query string. 
+		The <strong>command</strong> parameter is then sent to the extension.
+	</p>
+	<pre class="serverCode">
+from javax.servlet.http import HttpServlet
+from it.gotoandplay.smartfoxserver import SmartFoxServer
+from java.util import ArrayList
+
+class extensionMonitor(HttpServlet):
+
+	def __init__(self):
+		self.sfs = SmartFoxServer.getInstance()
+		self.zoneName = "TestZone"
+		self.extName = "TestExtension"
+	
+	def doGet(self, request, response):
+		write = response.getWriter().write
+		command = request.getParameter("command")
+
+		if command:
+			zone = self.sfs.getZone(self.zoneName)
+			extension = zone.getExtension(self.extName)
+
+			response = extension.handleInternalRequest(command)
+			write(response)
+
+		else:
+			write("&lt;h2&gt;The command is missing&lt;/h2&gt;")
+
+	def doPost(self, request, response):
+		pass
+	</pre>
+
+	<!-- ::::::: ARCHITECTURE CONSIDERATIONs ::::::: -->
+	<p class="subTitle">&raquo; Application architecture consideration</p>	
+	<p>
+		While this new addition certainly adds more flexibility to the server framework, we would also like to stress
+		that this feature <strong>should be used with care</strong> or it could lead to horrible application design and poor performance.
+	</p>
+	<p>
+		Very frequently we have been asked on the support forums about the ability to have <strong>multiple extensions running in different Zones</strong>
+		talk to each other. <strong style="color:#cc0000">In general we don't recommend doing this</strong> unless you have a good understanding of the server framework.
+	</p>
+	<p>
+		In the SmartFoxServer philosophy a ZONE is an &quot;area&quot; of the server where an application is running, and each &quot;areas&quot; should know nothing about the others.
+		This approach leads to the most clean and less error-prone design possible, and <strong>we highly discourage to design any advanced multiplayer application basing on multiple Zones talking to each other</strong>.
+	</p>
+	<p>
+		Even the most complex server side application can be cleanly organized in classes with the help of design patterns or other
+		architectural devices, and without the need of using the above mentioned approach.
+	</p>
+	<p>
+		The main purpose of the interoperability feature is to simplify the communication between extensions <strong>in the same Zone</strong> or between extensions
+		and other objects.
+	</p>
+	<p>
+		If you want to learn more about how to organize and design your server side code we highly recommend the following white-papers:
+		<ul>
+			<li><a href="roomArchitecture.htm" id="" title="roomArchitecture">Room Architecture</a></li>
+			<li><a href="../articles/build_mmo_p1.htm" id="" title="build_mmo_p1">Building Virtual World MMOs</a></li>
+		</ul> 
+	</p>
+<p>&nbsp;</p>
+
+<hr width="99%" size="1" noshade>
+<div align="center">
+	<a href="../../../index.htm" target="_top" class="navLinks">doc index </a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ <p class="title">3.1 The Basics </p>
+ <p class="subTitle">&raquo; Running the server </p>
+<blockquote style="border: 1px dotted #cc0000; padding:6px; background: #ffffee;">
+	<p>
+		In order to run <strong>SmartFoxServer</strong> follow the simple steps outlined at <strong>Chapter 1.3</strong> for your operating system.
+		Once the server is running you can monitor and control it by using the provided <a href="adminTool.htm">Administrator
+ Tool</a>.</p>
+</blockquote>
+
+ <p><span class="subTitle">&raquo; Flash player: connection restrictions and
+     cross-domain policy file.</span></p>
+ <p>The <strong>Adobe Flash Player</strong> provides a number of security restrictions when trying
+   to connect or access resources  outside the domain where the SWF file
+   is published. 
+   In other words, it is usually not possible to load resources or establish a socket connection to another domain
+   other than the one where the movie
+   is located.<br>
+   <br>
+   For example if your SWF file is published on <strong>www.mywebsite.com</strong>, the Flash Player will
+   refuse to load variables from <strong>www.anotherwebsite.com</strong> and even from a third level domain such as <strong>mydata.mywebsite.com</strong><br>
+   <br>
+   Especially after the release of <strong>Adobe Flash Player 9.0.115</strong> new restrictions have been added for socket connections.<br>
+   <br>
+   These limitations are controllerd by a <strong>cross-domain policy file</strong>: these files are simple xml files that  can be loaded from the web root of the external domain you want to access, or they can be served via socket. When you are pointing
+   the Flash Player to a resource outside the current domain it will try to load
+   the policy file from the web root of the external domain and see if it can
+   access the required resource. <br>
+   <br>
+Here's an example of a policy file:</p>
+<pre class="code">&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;!DOCTYPE cross-domain-policy SYSTEM &quot;http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd&quot;&gt;
+&lt;cross-domain-policy&gt;
+	&lt;allow-access-from domain=&quot;www.gotoandplay.it&quot; /&gt;
+&lt;/cross-domain-policy&gt; </pre>
+ <br>
+ The first 2 lines declare the document type and the following 3 are those you
+ have to edit. In this case we are allowing connections from www.gotoandplay.it
+ domain but you could also allow all domains by substituting the 4th line with
+ this one:<br>
+ <br>
+ <pre class="code"> &lt;allow-access-from domain=&quot;*&quot; /&gt;</pre>
+ <br>
+ This XML file should be always saved under the name of <strong>crossdomain.xml</strong> and
+ it should be placed in your web root folder. In the case of www.gotoandplay.it
+ the file should be reachable at this url: http://www.gotoandplay.it/crossdomain.xml<br>
+ <p><span class="subTitle">&raquo; Loading policy files via socket</span></p>
+ <p> SmartFoxServer allows to deliver a crossm-domain policy file directly from the socket connection directly to the Flash Player.<br>We provide various ways for defining a custom policy in the main config.xml:
+ <pre class="code">
+&lt;AutoSendPolicyFile&gt;true&lt;/AutoSendPolicyFile&gt; 
+&lt;PolicyAllowedDomains&gt;
+    &lt;AllowedDomain&gt;gotoandplay.it&lt;/AllowedDomain&gt;
+    &lt;AllowedDomain&gt;smartfoxserver.com&lt;/AllowedDomain&gt;
+&lt;/PolicyAllowedDomains&gt;
+</pre>
+</p>
+  	<p>You can alternatively define the whole cross-domain policy in an external file and specify it in the configuration to have it served via socket by SmartFoxServer:</p>
+  	<pre class="code">&lt;ExternalPolicyFile&gt;myPolicy.xml&lt;/ExternalPolicyFile&gt;</pre>
+<p>
+	For a detailed step-by-step discussion of the Flash Security model and the best practices to use in your Flash projects please <a href="http://www.smartfoxserver.com/whitepapers/fp_security" target="_blank">follow this in-depth article.
+    </a>
+<p>Additional resources are also available from the Adobe websire.
+
+<ul>
+		<li><a href="http://www.adobe.com/devnet/flash/articles/fplayer8_security.html" title="Adobe - Developer Center : Security Changes in Flash Player 8" target="_blank">Flash Player 8 Security</a></li>
+		<li><a href="http://www.adobe.com/devnet/flashplayer/articles/fplayer9_security.html" title="Adobe - Developer Center : Security changes in Flash Player 9" target="_blank">Flash Player 9 Security</a></li>
+	</ul>
+</p>
+
+<hr width="99%" size="1" noshade>
+<table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="../config/advanced.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right"><a href="logs.htm" class="navLinks"></a></td>
+  </tr>
+</table>
+
+</body>
+</html>

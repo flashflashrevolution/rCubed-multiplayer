@@ -1,0 +1,230 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ 	<p class="title"><span class="subTitle"><a name="top" id="93"></a></span>6.x Java Extensions CookBook </p>
+	<p>
+		This document provides quick snippets of code organized by theme that will get you started with most of the
+		server side coding tasks. Feel free to suggest more "<em>recipes</em>" by sending us an email or posting in our <a href="http://www.smartfoxserver.com/forums" target="_blank">support forums</a></a>
+	</p>
+
+<p class="subTitle">&raquo; User Variables Recipes</p>
+<p>
+	User Variables can be accessed from server side to easily propagate User related values across the users in the same rooms. This is typically used to change user state in games. 
+	The following recipes show a number of common use cases and examples of usage.
+</p>
+
+<p class="buttonTitle"><strong>Recipe #1:</strong></p>
+<p>
+	In this recipe we show how to update User Variables upon user request. The user sends a certain amount of points that will be added to a <em>score</em> User Variable, we then fire and update which
+	will update all clients that can interact with this user.
+</p>
+<p>
+	<strong>NOTE:</strong><br>
+	This is not the a recommended way of keeping score even if the variables update is sent from server side. This is just an example focusing on the usage of User Variables, not a tutorial on score keeping.
+</p>	
+<p>
+	The <strong>setUserVariables</strong>() method takes the following parameters:
+	<ul>
+		<li><strong>user</strong>: the user</li>
+		<li><strong>vars</strong>: the map of variables</li>
+		<li><strong>broadcastAll</strong>: if true sends an update to all clients in the target room (default = true)</li>
+	</ul>
+</p>	
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+}
+
+public void handleRequest(String cmd, ActionscriptObject asObj, User user, int fromRoom)
+{
+	if (cmd.equals("addScore"))
+	{
+		// Get the current score from the user variables
+		int currentScore = Integer.parseInt(user.getVariable("score").getValue());
+		
+		// Get the additional points from the user request
+		int points = (int) asObj.getNumber("points");
+		
+		// Update variables
+		Map&lt;String, UserVariable&gt; vars = new HashMap&lt;String, UserVariable&gt;();
+		vars.put("score", new UserVariable(String.valueOf(currentScore + points), TYPE_NUMBER));
+		
+		// Set Variables
+		helper.setUserVariables(u, vars, true);
+	}
+}	
+</pre>
+<p>
+	One final note on the code above: one User Variables are stored as String values so they need a bit of type conversion when using numbers or booleans.<br>
+	From <strong>version 1.6.5.02</strong> and higher, User and Room Variables can handle types other than String in a more convenient way (see next recipe).
+</p>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #2:</strong></p>
+<p>
+	This is the same example as in the previous recipe, using the additional methods introduced in SmartFoxServer PRO 1.6.5.02 and higher.
+</p>
+<p>
+	The following is a list of overridden methods added since that version:
+	<ul>
+		<li>
+			<strong>Getters</strong>:
+			<ul>
+				<li>String getValue()</li>
+				<li>String getIntValue()</li>
+				<li>String getDoubleValue()</li>
+				<li>String getBooleanValue()</li>
+			</ul>
+		</li>
+		<li>
+			<strong>Setters</strong>:
+			<ul>
+				<li>setValue(String value)</li>
+				<li>setValue(int value)</li>
+				<li>setValue(double value)</li>
+				<li>setValue(boolean value)</li>
+			</ul>
+		</li>
+	</ul> 
+	Also the old constructor is now deprecated and new versions have been added:
+	<ul>
+		<li>UserVariable(String value)</li>
+		<li>UserVariable(int value)</li>
+		<li>UserVariable(double value)</li>
+		<li>UserVariable(boolean value)</li>
+	</ul> 
+	
+</p>
+
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+}
+
+public void handleRequest(String cmd, ActionscriptObject asObj, User user, int fromRoom)
+{
+	if (cmd.equals("addScore"))
+	{
+		// Get the current score from the user variables
+		int currentScore = user.getVariable("score").getIntValue();
+		
+		// Get the additional points from the user request
+		int points = (int) asObj.getNumber("points");
+		
+		// Update variables
+		Map&lt;String, UserVariable&gt; vars = new HashMap&lt;String, UserVariable&gt;();
+		vars.put("score", new UserVariable(currentScore + points);
+		
+		// Set variables
+		helper.setUserVariables(u, vars, true);
+	}
+}	
+</pre>
+<p>
+	One final note on the code above: one User Variables are stored as String values so they need a bit of type conversion when using numbers or booleans.<br>
+	From <strong>version 1.6.5.02</strong> and higher User and Room Variables can handle types other than String in a more convenient way (see next recipe).
+</p>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #3:</strong></p>
+<p>
+	In this recipe we show how to create different types of user variables using any version of SmartFoxServer PRO &lt; 1.6.5.02
+</p>
+
+
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+}
+
+public void setSomeVariables(User user)
+{
+	boolean isActive = true;
+	int theScore = 12345;
+	double phi = 1.61803399;
+	String avatarType = "kermitTheFrog";
+	String extraInfo = null;
+	
+	// Populate variables
+	Map&lt;String, UserVariable&gt; vars = new HashMap&lt;String, UserVariable&gt;();
+	vars.put("isActive", new UserVariable(String.valueOf(isActive), TYPE_BOOLEAN);
+	vars.put("theScore", new UserVariable(String.valueOf(theScore), TYPE_NUMBER);
+	vars.put("phi", new UserVariable(String.valueOf(theScore), TYPE_NUMBER);
+	vars.put("avatarType", new UserVariable(avatarType, TYPE_STRING);
+	vars.put("extraInfo", new UserVariable(extraInfo, TYPE_STRING);
+	
+	// Set variables
+	helper.setUserVariables(user, vars, true);
+}	
+</pre>
+
+<!-- ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: -->
+	
+<p class="buttonTitle"><strong>Recipe #4:</strong></p>
+<p>
+	In this recipe we repeat the same example of <strong>Recipe #3</strong>, using the updated classes found in SmartFoxServer PRO 1.6.5.02 and higher.
+</p>
+
+
+<pre class="codeBlockServer">
+ExtensionHelper helper;
+
+public void init()
+{
+	helper = ExtensionHelper.instance();
+}
+
+public void setSomeVariables(User user)
+{
+	boolean isActive = true;
+	int theScore = 12345;
+	double phi = 1.61803399;
+	String avatarType = "kermitTheFrog";
+	String extraInfo = null;
+	
+	// Populate variables
+	Map&lt;String, UserVariable&gt; vars = new HashMap&lt;String, UserVariable&gt;();
+	vars.put("isActive", new UserVariable(isActive));
+	vars.put("theScore", new UserVariable(theScore));
+	vars.put("phi", new UserVariable(phi));
+	vars.put("avatarType", new UserVariable(avatarType));
+	vars.put("extraInfo", new UserVariable(extraInfo));
+	
+	// Set variables
+	helper.setUserVariables(user, vars, true);
+}	
+</pre>
+
+
+	
+ <p>&nbsp;</p>
+<hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="mailer.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

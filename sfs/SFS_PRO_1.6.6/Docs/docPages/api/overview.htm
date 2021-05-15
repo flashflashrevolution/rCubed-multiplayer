@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+	<p class="title">4.2 API Overview </p>
+	<p>
+		The <strong>SmartFoxServer Client API</strong> provide a set of high level classes that interact asynchronously with the server with a simple event-based callback system. Additionally the API allow using native Actionscript objects for sending and receiving data to and from the server.
+	</p>
+	<p>The SmartFoxClient class is the main entry point of the API, where you register for server notifications and call methods for logging in, joining rooms, sending messages etc...</p>
+
+ <p class="subTitle">&raquo; Asynchronous programming</p>
+
+<p>By working with Flash/Flex you should already be familiar with asynchronous programming.
+   Basically each time you load variables, images or external movie clips, you
+   have to register a callback function that will handle the completion of the task, which may happen at any momement depening on the location of the resource.<br>
+   <br>
+This same approach is also at the basis of all multi-user / multi-player applications.
+For every request that you send to the server you will need a corresponding event handler that will take care of the asynchronous response coming from the server.   
+   <br><br>
+   Here's a very simple example of how it works (Actionscript 2.0):
+</p>
+ <pre class="code">
+// Import the API classes
+import it.gotoandplay.smartfoxserver.*<br>
+// Create an instance of the SmartFoxClient class
+var sfs:SmartFoxClient = new SmartFoxClient()<br>
+// Attempt a connection to the server
+sfs.connect("127.0.0.1", 9339)
+
+sfs.onConnection = function(success:Boolean):Void
+{
+	if (success)
+	{
+		trace("Great! Connected successfully!")
+	}
+	else
+	{
+		trace("An error occurred, could not connect!")
+	}
+}
+   </pre>
+   </p>
+   <br>
+The <strong>connect()</strong> method attempts to connect to the server running on the IP address
+127.0.0.1 and port 9339 (default)<br>
+It also handles the SmartFoxServer <strong>onConnection</strong> event that is
+fired when the connection attempt produces a response.<br>
+<br>
+You will find the detailed list of properties, methods and events of the SmartFoxClient
+class in this section for both Actionscript 2.0 and 3.0
+<p><span class="subTitle">&raquo; Importing and using the SmartFoxClient class</span> <strong><br>
+    <br>
+</strong>In order to use the <strong>SmartFoxClient</strong> class you will need
+to tell Flash to include it in your current code. This is usually done by adding
+in the very first line of your code an Actionscript command, based on which Actionscript
+version you're using in your project.<br>
+<br>
+For Flash MX and MX2004 using Actionscript 1.0 be sure to have this line as the
+very first one in your code:
+<pre class="code">#include &quot;SmartFoxClient.as&quot;</pre>
+</p>
+<p>For Flash and Flex using Actionscript 2.0 and 3.0, use this line instead:
+<pre class="code">import it.gotoandplay.smartfoxserver.*</pre><br>
+  </p>
+  <hr width="99%" size="1" noshade>
+  <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%">&nbsp; </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right"><a href="installing.htm" class="navLinks"></a></td>
+  </tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>SmartFoxServer Documentation</title>
+<link href="../../../api.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="plain">
+ <p class="itemName">_server.setBuddyBlockStatus()</p>
+ <p class="title">Availability:</p>
+ <p class="plain">SmartFoxServer PRO 1.6.0 </p>
+ <p class="title">Usage:</p>
+ <p class="plain">_server.setBuddyBlockStatus(user, buddyName, isBlocked)</p>
+ <p class="title">Description:</p>
+<p class="plain">
+	Set the <strong>isBlocked</strong> flag of a buddy in the User's buddy list.<br>
+	When the <strong>isBlocked</strong> flag is set to <b>true</b> the buddy won't be able to send any messages to the user.
+</p>
+<p>
+	For a complete overview of the <strong>Buddy List 2.0</strong> system introduced in version 1.6 check <a href="../../sfsPro/buddyList2.htm" target="blank">this document.</a>
+</p>
+<p class="title">Properties:</p>
+ <table  border="0" cellspacing="0" cellpadding="3">
+   <tr>
+     <td valign="top" nowrap="nowrap">
+		<strong>user</strong>
+	</td>
+     <td>&nbsp;</td>
+     <td>the owner of the buddy list</td>
+   </tr>
+
+	<tr>
+	     <td valign="top" nowrap="nowrap">
+			<strong>buddyName</strong>
+		</td>
+	     <td>&nbsp;</td>
+	     <td>the name of the buddy to block / unblock</td>
+	   </tr>
+	
+	<tr>
+	     <td valign="top" nowrap="nowrap">
+			<strong>isBlocked</strong>
+		</td>
+	     <td>&nbsp;</td>
+	     <td>the status (true == blocked)</td>
+	   </tr>
+
+ </table>
+ <p class="title">Returns:</p>
+ <p class="plain">nothing, it will fire and <strong>onBuddyListUpdate</strong> event on the client side.</p>
+ <p class="title">Example:</p>
+<pre class="code">
+// Blocks the buddy called "Mr.X" in the "user" buddy list
+_server.setBuddyBlockStatus(user, "Mr.X", true)
+</pre>
+<br /> 
+<p class="plain"><span class="title">See also:</span></p>
+ <p class="plain"><strong></strong></p>
+ <p class="plain">addBuddy(), removeBuddy()</p>
+</body>
+</html>

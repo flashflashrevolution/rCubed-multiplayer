@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../../lib.js"></script>
+<link href="../../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+	<p class="title">8.17 Socket File Loader </p>
+	
+	<table width="300" border="1" align="right" cellpadding="4" cellspacing="0" bordercolor="#999999">
+	   <tr>
+	     <td align="right" bgcolor="#f4f4f4">The <strong>source</strong> of 
+	       this example is found under the <strong>Examples/AS2/26_pro_socketFileLoader</strong> folder.</td>
+	   </tr>
+	 </table>
+	
+	<!-- ::::::: INTRO ::::::: -->
+	<p>
+		With the introduction of <strong>ByteArrays</strong> in Actionscript 3.0/Flash Player 9 we can finally stream binary data via http and socket. <br>
+		The new feature allows developers to transfer objects and assets (images / swf files) 
+		through the network, enabling several interesting "tricks" that we can use to secure our <strong>SmartFoxServer</strong> based applications.
+	</p>
+	 <p>
+	 	One of the most interesting uses of this new Flash Player feature is to <strong>bypass the browser's cache</strong> in order to "hide" important pieces of the application and strengthen the overall 
+		level of security. One of the captivating feature of <strong>ByteArrays</strong> is that you can easily manipulate them via Actionscript at runtime, opening the doors to advanced techniques like using runtime data compression, garbling, encryption etc...
+	 </p>
+	<p>
+		The application presented in this tutorial will guide you through the simple steps that are necessary to read files from the server side and stream them to the client via socket.
+	</p>
+	
+	<!-- ::::::: BINARY DATA ::::::: -->
+	<img src="images/binary.jpg" width="185" height="185" alt="binary data" class="imgBorder" align="right">
+	<p class="subTitle">&raquo; Binary data and Flash sockets</p>
+	<p>
+		Before we proceed with the description of this example it is important to see what happens at the lowest level of communication
+		between <strong>Flash</strong> and <strong>SmartFoxServer</strong>.<br>
+		All versions of Flash Player &lt; 9 connect via socket using the <strong>XMLSocket</strong> class which uses a fixed protocol based on 0-byte terminated strings.
+		In other words the <strong>XMLSocket</strong> doesn't support a real binary protocol but it is limited to sending strings terminated by a <strong>0x00</strong> byte.
+	</p>
+	<p>
+		In order to maintain compatibility with older versions of the Flash Player, <strong>SmartFoxServer</strong> doesn't support a full binary protocol, yet. 
+		In fact, as of today (December 2007), the number of applications and games done in Actionscript 3 are still a small percentage compared to those created in AS 2.0.
+		In future releases SmartFoxServer PRO will definitely support the new binary sockets provided by the Flash Player 9.
+	</p>
+	<blockquote style="border: 1px dotted #cc0000; padding:6px; background: #ffffee;">
+		<strong>NOTE:</strong> <br>
+		Even if maintaining <strong>XMLSocket</strong> compatibility may sound limiting for Actionscript 3 applications, you will be surprised to learn that the byte-terminated protocol is actually
+		<strong>very efficient</strong> when sending small packets at a very high rate (i.e. in realtime games).<br>
+		This is because it is required <strong>one single byte</strong> to determine the end of a message, while in binary form each message comes with a <strong>fixed-length header</strong> which
+		usually takes at least 8 bytes, providing a larger overhead.
+	</blockquote>
+	<p>
+		In order to be able to stream binary data using the <strong>XMLSocket</strong> class we use a <strong>Base64</strong> representation of the data. <strong>Base64</strong> is a very popular
+		data format that allows binary data to be converted in plain text: one of the most popular application of this format is encoding file attachments in email messages. ( The Actionscript 3.0 Base64 class is provided by <strong>SubHero</strong> )
+	</p>
+	<p>Learn more about <strong>Base64</strong>:</p>
+	<ul>
+		<li><a href="http://en.wikipedia.org/wiki/Base64" title="Base64 - Wikipedia, the free encyclopedia" target="_blank">Wikipedia</a></li>
+		<li><a href="http://undefined.com/ia/2006/05/25/base64-encoding-for-actionscript-3flex-20/" title="Indefinite Articles &raquo; Base64 Encoding for ActionScript 3/Flex 2.0" target="_blank">Actionscript and Base64</a></li>
+		<li><a href="http://iharder.sourceforge.net/current/java/base64/" title="Base64: Public Domain Base64 Encoder/Decoder" target="_blank">Java and Base64</a></li>
+	</ul>
+	
+	<!-- ::::::: CLIENT SIDE ::::::: -->
+	<p class="subTitle">&raquo; The client side</p>
+	<p>
+		The Flash CS3 example application is developed on a single frame and you can find the Actionscript code at the <strong>top of the timeline</strong>.
+		On the stage you find an empty movieclip used as a placeholder for loading the external assets and a combo box component which will contain three items to load.<br>
+		The debug text area at the bottom of the stage will output the events received from the server.
+	</p>
+	<img src="images/screenshot.png" width="552" height="399" alt="Screenshot" class="imgBorder" align="center">
+	<p>
+		The flow of the example application is very simple:
+		<ul>
+			<li>User clicks the <strong>Connect</strong> button to start a connection with the server</li>
+			<li>User is auto-joined in a default room</li>
+			<li>User selects one of the assets from the drop down list and clicks <strong>Load Image</strong></li>
+			<li>The file is requested to the server, streamed via socket and finally shown on screen</li>
+		</ul>
+	</p>
+	
+	<p>
+		When the <strong>Load Image</strong> button is clicked the client sends a request to extension passing the id of the image to load:
+	</p>
+	<pre class="code">
+function bt_load_click(evt:Event):void
+{
+	// Prepare the array of parameters
+	var req:Array = []
+
+	// Store the id of the image that we want to load
+	req[0] = cb_images.selectedItem.data
+
+	// Send the request to the server, in String format
+	sfs.sendXtMessage("loader", "loadImg", req, SmartFoxClient.XTMSG_TYPE_STR)
+}	
+	</pre>
+	<p>
+		The server will send the <strong>Base64</strong> encoded file data, which is handled in a few lines of code:
+	</p>
+	<pre class="code">
+function decodeImage( data:String ):void
+{
+	var dec:ByteArray = Base64.decode64(data)
+	imgLoader.loadBytes(dec)
+
+	debugTrace("Image Loading Complete! TOT: " + dec.length + " bytes.")
+}	
+	</pre>
+	<p>Very simple, indeed!</p>
+	
+	<!-- ::::::: SERVER SIDE ::::::: -->
+	<p class="subTitle">&raquo; The server side</p>
+	<p>
+		The server side extension is written in Java and it comes together with an open source <strong>Base64</strong> implementation by <a href="http://iharder.net/base64" target="_blank">Robert Harder</a>.
+		(NOTE: this class can be also used from any Actionscript and Python server extensions)
+	</p>
+	<p>
+		In this example a convention has been established so that the requested image name is made up of three parts: the first bit is <strong>img_</strong>,
+		the second one is the image id (0,1,2) coming from the client side request and the third is the <strong>.jpg</strong> extension.
+	</p>
+	<p>
+		The server response is sent in String format where the first parameter is a <strong>1</strong> if the file was loaded successfully or a <strong>0</strong>
+		if an error occurred. The second parameter in the response object is the actual <strong>Base64</strong> encoded data of the image.
+	</p>
+	<p>The encoding is performed in a very simple way, with the following code:</p>
+	<pre class="serverCode">
+private String encodeFile(String filePath) throws IOException
+{
+	String encodedData;
+
+	File input = new File(filePath);
+
+	// Prepare byte array according to the file size
+	byte[] byteData = new byte[(int) input.length()];
+
+	// Read data from file into byte array
+	FileInputStream inStream = new FileInputStream(input);
+	inStream.read(byteData);
+
+	// Encode in Base64
+	encodedData = Base64.encodeBytes(byteData, Base64.DONT_BREAK_LINES);
+
+	return encodedData;
+}		
+	</pre>
+	<p>&nbsp;</p>
+
+	<hr width="99%" size="1" noshade>
+	<div align="center">
+		<a href="../../../index.htm" target="_top" class="navLinks">doc index </a>
+	</div>	
+</body>
+</html>

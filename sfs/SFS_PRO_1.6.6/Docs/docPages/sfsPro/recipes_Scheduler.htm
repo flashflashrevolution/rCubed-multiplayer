@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SmartFoxServer Documentation</title>
+<script language="javascript" src="../../lib.js"></script>
+<link href="../../main.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bodyStyle">
+ 	<p class="title"><span class="subTitle"><a name="top" id="93"></a></span>6.x Java Extensions CookBook </p>
+	<p>
+		This document provides quick snippets of code organized by theme that will get you started with most of the
+		server side coding tasks. Feel free to suggest more "<em>recipes</em>" by sending us an email or posting in our <a href="http://www.smartfoxserver.com/forums" target="_blank">support forums</a></a>
+	</p>
+
+<p class="subTitle">&raquo; Scheduler Recipes</p>
+<p>
+	The <strong>Scheduler</strong> object can handle multiple timed tasks providing a simple callback mechanism that notifies when it&#x27;s time to execute the job.
+	You can add any number of timed tasks to execute. Behind the scenes the Scheduler uses a single thread to handle multiple timed jobs.
+</p>
+<p style="border: 1px dotted #cc0000; background-color:#ffffee; padding:10px;">
+  	<strong>NOTE:</strong>
+	The <strong>Scheduler</strong> class is designed to handle multiple task with a minimum resolution of around 800-1000 milliseconds (~ 1 sec) or higher. Typical use cases can be any timed tasks, game timers, count downs etc...
+	If you need to run very fast jobs with intervals of a few milliseconds then it is more appropriate to use a dedicate thread, a thread pool or the Executor classes from Java 1.5 and higher.
+</p>
+
+<p class="buttonTitle"><strong>Recipe #1:</strong></p>
+<p>
+	This is an example of various timers running concurrently within the same <strong>Scheduler</strong> object.
+</p>	
+<pre class="codeBlockServer">
+//This is the class that will handle the callbacks from the Scheduler
+class MyTaskHandler implements ITaskHandler
+{
+        int loopCount = 0;
+
+        public void doTask(Task task) throws Exception
+        {
+                String id = (String) task.id;
+                String message = "Handling Task { " + id + " }";
+
+                if (id.equals("looping"))
+                {
+                        loopCount++;
+                        message += ", Loop count: " + loopCount;
+
+                        if (loopCount == 5)
+                        {
+                                message += ", Stopping Loop!";
+
+                                // This will stop the execution of the looping task
+                                task.active = false;
+                        }
+                }
+
+                else if (id.equals("param"))
+                {
+                        message += ", Passed params: " + task.parameters;
+                }
+
+                System.out.println(message);
+
+        }
+}
+
+Scheduler scheduler;
+ITaskHandler handler;
+
+public void init()
+{
+        trace("Scheduler Example Starts");
+
+        // Create an instance of the scheduler
+        scheduler = new Scheduler();
+
+        // Create and instance of the callback handler
+        handler = new MyTaskHandler();
+
+        // Create a new task
+        Task loopingTaks = new Task("looping");
+
+        // Create a new task
+        Task normalTask = new Task("normal");
+
+        // Create a map of parameters that we'll add to the 3rd task
+        Map params = new HashMap();
+        params.put("Italy", "Europe");
+        params.put("Canada", "North America");
+        params.put("China", "Asia");
+
+        // create a new task with the additional parameters
+        Task paramTask = new Task("param", params);
+
+        // Add tasks to the scheduler
+        scheduler.addScheduledTask(loopingTaks, 3, true, handler);
+        scheduler.addScheduledTask(normalTask, 5, false, handler);
+        scheduler.addScheduledTask(paramTask, 2, false, handler);
+
+        // Start the scheduler
+        scheduler.startService();
+
+        //... you can keep adding more tasks at runtime...
+}
+</pre>
+
+	
+<p>&nbsp;</p>
+<hr width="99%" size="1" noshade>
+ <table width="99%"  border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="33%"><a href="mailer.htm" class="navLinks"></a> </td>
+    <td width="34%" align="center"><a href="../../index.htm" target="_top" class="navLinks">doc index </a></td>
+    <td width="33%" align="right">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

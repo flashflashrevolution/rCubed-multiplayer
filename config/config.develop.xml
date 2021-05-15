@@ -1,0 +1,171 @@
+<SmartFoxConfig>
+	<ServerSetup>
+		<!-- 
+			Specify an ip address or use an asterisk(*) to bind all available IPs
+		-->
+		<ServerIP>*</ServerIP>
+		<ServerPort>9339</ServerPort>
+
+		<AutoSendPolicyFile>true</AutoSendPolicyFile>
+		<MaxUserIdleTime>10000</MaxUserIdleTime>
+		<MaxSocketIdleTime>60</MaxSocketIdleTime>
+		
+		<!-- Server Variables limits (-1 = unlimited) -->
+		<MaxRoomVars>-1</MaxRoomVars>
+		<MaxUserVars>-1</MaxUserVars>
+		
+		<!-- Antiflood filter -->
+		<AntiFlood active="false">
+			<MinMsgTime tolerance="6">1200</MinMsgTime>
+			<MaxRepeatedMessages>4</MaxRepeatedMessages>
+			<WarningsBeforeKick>5</WarningsBeforeKick>
+			<WarningMessage><![CDATA[No flooding allowed!)]]></WarningMessage>
+			<KickMessage><![CDATA[You've been warned! No flooding! Now you're kicked]]></KickMessage>
+			<BanMessage><![CDATA[Stop Flooding!! You're being banned]]></BanMessage>			
+			<BanAfter timeSpan="1">3</BanAfter>
+		</AntiFlood>
+		
+		<!-- Bad words filter -->
+		<BadWordsFilter active="true">
+			<FilterMode>filter</FilterMode> <!-- REMOVE or FILTER -->
+			<StripCharacters><![CDATA[,.;:_!$%&/#*-+]]></StripCharacters>
+			<Warnings>true</Warnings>
+			<FilterRoomNames>true</FilterRoomNames>
+			<FilterUserNames>true</FilterUserNames>
+			<WarningsBeforeKick>3</WarningsBeforeKick>
+			<WarningMessage><![CDATA[No swearing!)]]></WarningMessage>
+			<KickMessage><![CDATA[You've been warned! No Swearing! Now you're kicked]]></KickMessage>
+			<BanMessage><![CDATA[Stop Swearing! You're being banned!]]></BanMessage>	
+			<BanAfter timeSpan="1">3</BanAfter>
+			
+			<BadWordsList>
+				<badWord>nigger</badWord> 
+				<badWord>nigga</badWord> 
+				<badWord>cunt</badWord> 
+				<badWord>faggot</badWord> 
+				<badWord>kike</badWord> 
+				<badWord>cocksucker</badWord> 
+				<badWord>beaner</badWord> 
+				<badWord>wetback</badWord> 
+				<badWord>gook</badWord> 
+				<badWord>honky</badWord> 
+				<badWord>honkie</badWord> 
+				<badWord>towelhead</badWord> 
+				<badWord>raghead</badWord> 
+				<badWord>dunecoon</badWord>
+				<badWord>sandnigger</badWord>
+				<badWord>buttfucker</badWord>
+			</BadWordsList>
+		</BadWordsFilter>
+		
+		<BanCleaning>auto</BanCleaning>
+		<BanDuration>1800</BanDuration> <!-- 30 min -->
+		<BannedLoginMessage>You have been banned!</BannedLoginMessage>
+		
+		<OutQueueThreads>16</OutQueueThreads>
+		<ExtHandlerThreads>16</ExtHandlerThreads>
+		<MaxWriterQueue>600</MaxWriterQueue>
+		
+		<!-- 
+			New since 1.6.0 
+			Set the client queue size and the max. allowed dropped packets
+		-->
+		<ClientMessagQueue>
+			<QueueSize>100</QueueSize>
+			<MaxAllowedDroppedPackets>10</MaxAllowedDroppedPackets>
+		</ClientMessagQueue>
+		
+		<MaxIncomingQueue>12000</MaxIncomingQueue>
+		<DeadChannelsPolicy>strict</DeadChannelsPolicy>
+		<MaxMsgLen>4096</MaxMsgLen>
+		
+		<LogMaxSize>50000000</LogMaxSize>
+		<LogMaxFiles>3</LogMaxFiles>
+		
+		<!--
+			Available options are:
+			
+			FINEST
+			FINER
+			FINE
+			CONFIG
+			INFO
+			WARNING
+			SEVERE
+		-->
+		<FileLoggingLevel>SEVERE</FileLoggingLevel>
+		<ConsoleLoggingLevel>INFO</ConsoleLoggingLevel>	
+		
+		<!-- Adminisitrator login -->
+		<AdminLogin>admin</AdminLogin>
+		<AdminPassword>password</AdminPassword>
+		
+		<!-- Allowed administrator IP addresses -->
+		<AdminAllowedAddresses>
+			<AllowedAddress>127.0.0.1</AllowedAddress>
+		</AdminAllowedAddresses>
+
+		<!-- Allow remote debugging of extensions -->
+		<ExtensionRemoteDebug>true</ExtensionRemoteDebug>
+		
+		<!-- 
+			Allow global autoreload of extensions upon file save 
+			You should specify in each Zone if the autoreload is enabled.
+		-->
+		<AutoReloadExtensions>true</AutoReloadExtensions>
+		
+		<!-- Allows remote extension debugging in the admin tool -->
+		<ExtensionRemoteDebug>true</ExtensionRemoteDebug>
+		
+		<!-- Specify the max number of clients connected under the same IP. 0 = unlimited -->
+		<IpFilter>0</IpFilter>
+		
+		<!-- Enable / Disable remote zone info -->
+		<EnableZoneInfo>false</EnableZoneInfo>
+		
+		<!--  raw custom protocol separator --> 
+		<RawProtocolSeparator><![CDATA[%]]></RawProtocolSeparator>
+
+		<DynamicPropertiesClass>java.util.concurrent.ConcurrentHashMap</DynamicPropertiesClass>
+		
+	</ServerSetup>
+	
+	
+	
+	<!--
+		Zones Configuration.
+	-->
+	<Zones>	
+		
+		<Zone name="sampleZone">
+			<AutoReloadExtensions>true</AutoReloadExtensions>
+
+			<Rooms>
+				<Room name="The Hall" maxUsers="50" isPrivate="false" isTemp="false" autoJoin="true" uCountUpdate="true" />		
+			</Rooms>
+			
+			<Extensions>
+				<extension name="ffrExt"  className="ffr.MultiplayerExtension" type="java" />
+			</Extensions>
+
+			<DatabaseManager active="false">
+				<Driver>com.mysql.cj.jdbc.Driver</Driver>
+
+				<ConnectionString>jdbc:mysql://dblocalhost:3306/ffr_vb2</ConnectionString>
+				<UserName></UserName>
+				<Password></Password>
+
+				<TestSQL><![CDATA[SELECT COUNT(*) FROM vb_user]]></TestSQL>
+
+				<MaxActive>100</MaxActive>
+				<MaxIdle>50</MaxIdle>
+
+				<OnExhaustedPool>grow</OnExhaustedPool>
+				<BlockTime>5000</BlockTime>
+			</DatabaseManager>
+		</Zone>
+	
+	</Zones>
+	
+	
+</SmartFoxConfig>
