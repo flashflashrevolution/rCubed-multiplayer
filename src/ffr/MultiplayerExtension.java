@@ -3,22 +3,44 @@ package ffr;
 import it.gotoandplay.smartfoxserver.data.User;
 import it.gotoandplay.smartfoxserver.events.InternalEventObject;
 import it.gotoandplay.smartfoxserver.extensions.AbstractExtension;
-import it.gotoandplay.smartfoxserver.extensions.ExtensionHelper;
 import it.gotoandplay.smartfoxserver.lib.ActionscriptObject;
+import it.gotoandplay.smartfoxserver.lib.SmartFoxLib;
+
+import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
+import com.healthmarketscience.sqlbuilder.CustomSql;
+import com.healthmarketscience.sqlbuilder.SelectQuery;
 
 public class MultiplayerExtension extends AbstractExtension {
-	private ExtensionHelper helper;
 
 	public void init() {
-		helper = ExtensionHelper.instance();
-
 		trace("Hi! The Simple Extension is initializing");
-		trace("Less exceptional things.");
+		TryToLogIn("adada", "qqqq");
 	}
 
 	public void destroy() {
 		trace("Bye bye! SimpleExtension is shutting down!");
-		trace("Farewell change, I will miss you.");
+	}
+
+	private void TryToLogIn(String userid, String session) {
+		userid = SmartFoxLib.escapeQuotes(userid);
+		session = SmartFoxLib.escapeQuotes(session);
+
+		String selectSession = new SelectQuery()
+			.addCustomColumns(
+				new CustomSql("ffr_login_sessions.userid"),
+				new CustomSql("ffr_login_sessions.sessionid")
+			)
+			.addCondition(
+				BinaryCondition.equalTo("ffr_login_sessions.sessionid", session)
+			)
+			.addCondition(
+				BinaryCondition.equalTo("ffr_login_sessions.userid", 2046665)
+			)
+			.validate()
+			.toString();
+		
+		trace(selectSession);
 	}
 
 	/**

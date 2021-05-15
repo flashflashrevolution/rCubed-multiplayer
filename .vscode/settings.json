@@ -9,7 +9,8 @@
     "java.project.referencedLibraries": [
         "sfs/SFS_PRO_1.6.6/Server/lib/json-lib-2.1-jdk15.jar",
         "sfs/SFS_PRO_1.6.6/Server/lib/json.jar",
-        "sfs/SFS_PRO_1.6.6/Server/lib/jysfs.jar"
+        "sfs/SFS_PRO_1.6.6/Server/lib/jysfs.jar",
+        "lib/sqlbuilder-3.0.1.jar"
     ],
     "java.format.enabled": true,
     "java.format.comments.enabled": true,
