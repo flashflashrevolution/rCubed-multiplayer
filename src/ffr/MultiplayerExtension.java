@@ -9,32 +9,44 @@ import it.gotoandplay.smartfoxserver.lib.SmartFoxLib;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.CustomSql;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
+import com.healthmarketscience.sqlbuilder.dbspec.Table;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 
 public class MultiplayerExtension extends AbstractExtension {
 
 	public void init() {
 		trace("Hi! The Simple Extension is initializing");
-		TryToLogIn("adada", "qqqq");
+		TryToLogIn("asdf", "asdf");
 	}
 
 	public void destroy() {
 		trace("Bye bye! SimpleExtension is shutting down!");
 	}
 
-	private void TryToLogIn(String userid, String session) {
-		userid = SmartFoxLib.escapeQuotes(userid);
-		session = SmartFoxLib.escapeQuotes(session);
+	private void TryToLogIn(String username, String password) {
+		username = SmartFoxLib.escapeQuotes(username);
+		password = SmartFoxLib.escapeQuotes(password);
+
+		DbSpec spec = new DbSpec();
+    	DbSchema schema = spec.addSchema("ffr_vb2");
+		DbTable ffrLoginSessionsTable = new DbTable(schema, "vb_user");
+		DbColumn passwordColumn = ffrLoginSessionsTable.addColumn("password", "varchar", 255);
+		DbColumn userNameColumn = ffrLoginSessionsTable.addColumn("username", "varchar", 100);
+		DbColumn userIdColumn = ffrLoginSessionsTable.addColumn("userid", "number", null);
+		DbColumn userGroupIdColumn = ffrLoginSessionsTable.addColumn("usergroupid", "number", null);
 
 		String selectSession = new SelectQuery()
 			.addCustomColumns(
-				new CustomSql("ffr_login_sessions.userid"),
-				new CustomSql("ffr_login_sessions.sessionid")
+				passwordColumn,
+				userIdColumn,
+				userGroupIdColumn
 			)
+			.addFromTable(ffrLoginSessionsTable)
 			.addCondition(
-				BinaryCondition.equalTo("ffr_login_sessions.sessionid", session)
-			)
-			.addCondition(
-				BinaryCondition.equalTo("ffr_login_sessions.userid", 2046665)
+				BinaryCondition.equalTo(userNameColumn, username)
 			)
 			.validate()
 			.toString();
