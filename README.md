@@ -20,9 +20,21 @@ config.develop.xml has the DatabaseManager turned off be default.
 
 ## Developing (Required)
 
-1. Run `./start.sh` after attaching to the container.
-1. Build with `Ctrl + Shift + B` to build and reload your extensions.
-1. Attach with `F5` to hit breakpoints.
+1. Build the initial `.class` files with `Ctrl + Shift + B`.
+1. Start SmartFoxServer:
+    ```zsh
+    ./start.sh
+    ```
+2. Build with `Ctrl + Shift + B` to build and reload your extensions.
+    - (Note: This currently doesn't work, [see thread](https://www.smartfoxserver.com/forums/viewtopic.php?f=4&p=96649&sid=eadfdce259bad95db397fe75090170c9#p96649).)
+    - Alternative Auto Reload strategy:
+        1. Switch your "build" task to `Export Jar`.
+        2. Build with `Ctrl + Shift + B`.
+        3. Use the [Admin Tool](#server-admin-tool-optional) to reload
+        the extension after running `Export Jar`.
+           - (Warning: If you switch back to `.class` files,
+        make sure you delete `./lib/ffr/MultiplayerExtension.jar.`)
+3. Attach with `F5` to hit breakpoints.
 
 ## Server Admin Tool (Optional)
 
