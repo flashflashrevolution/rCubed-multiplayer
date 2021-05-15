@@ -7,9 +7,7 @@ import it.gotoandplay.smartfoxserver.lib.ActionscriptObject;
 import it.gotoandplay.smartfoxserver.lib.SmartFoxLib;
 
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
-import com.healthmarketscience.sqlbuilder.CustomSql;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
-import com.healthmarketscience.sqlbuilder.dbspec.Table;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
@@ -18,12 +16,12 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 public class MultiplayerExtension extends AbstractExtension {
 
 	public void init() {
-		trace("Hi! The Simple Extension is initializing");
+		trace("MultiplayerExtension Initialized");
 		TryToLogIn("asdf", "asdf");
 	}
 
 	public void destroy() {
-		trace("Bye bye! SimpleExtension is shutting down!");
+		trace("Bye bye!");
 	}
 
 	private void TryToLogIn(String username, String password) {
