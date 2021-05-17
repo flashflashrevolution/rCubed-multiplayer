@@ -54,6 +54,9 @@ if git diff --quiet HEAD -- ':!bootstrap.sh'; then
     git lfs pull
     git config --local core.editor "code --wait"
 
+    # Fix ssh mount issues.
+    sudo chown -R vscode:vscode /home/vscode/.ssh
+
 else
     echo "You have uncommitted changes, please stash or commit before bootstrapping."
 fi
