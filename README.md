@@ -5,7 +5,7 @@
   - [Where to Clone (For Performance Reasons)](#where-to-clone-for-performance-reasons)
   - [Attach to the dev environment. (Required)](#attach-to-the-dev-environment-required)
   - [Bootstrap (Required)](#bootstrap-required)
-  - [MySQL Connection (Optional)](#mysql-connection-optional)
+  - [MySQL Connection Access (Optional)](#mysql-connection-access-optional)
   - [Developing (Required)](#developing-required)
   - [Server Admin Tool (Optional)](#server-admin-tool-optional)
 
@@ -27,7 +27,7 @@ code .
 ## Attach to the dev environment. (Required)
 
 1. Install the `Remote - Containers` extension in for Visual Studio Code.
-1. Hit `F1`, type/trigger `Rebuild and Open in Container`
+2. Hit `F1`, type/trigger `Rebuild and Open in Container`
 
 ## Bootstrap (Required)
 
@@ -40,13 +40,14 @@ chmod +x bootstrap.sh start.sh
 ./bootstrap.sh
 ```
 
-## MySQL Connection (Optional)
+## MySQL Connection Access (Optional)
 
-- You will require access to the server for this to work.
+- You will need to request access to the server for MySQL to function.
 - BasicExamples.zone.xml has the DatabaseManager turned off by default.
-- Set `databaseManager active="true"` and fill in the password in a **separate** zone.xml file
-Do not add MySQL info any zone file that can be checked in to the depo to prevent accidental checkin.
-- Make sure there is a safe code path when a database cannot be connected to.
+- Duplicate BasicExamples.zone.xml and set `databaseManager active="true"`.
+- **Do not add MySQL info any zone file that can be checked in to the depo to prevent exposing passwords.**
+- Because SQL wont work for everyone, 
+make sure there is a safe code path when a database cannot be connected to.
 
 ```zsh
 # Conntects a tunnel to access MySQL server over localhost.
@@ -56,16 +57,12 @@ ssh -L 3306:dblocalhost:3306 flashfla@flashflashrevolution.com
 ## Developing (Required)
 
 1. Build the extension with `Ctrl + Shift + B`.
-1. Start SmartFoxServer:
-    ```zsh
-    ./start.sh
-    ```
-2. Attach to debug with `F5`.
+2. Attach with `F5`. (The tunnel and SmartFox will automatically start)
 
 ## Server Admin Tool (Optional)
 
 1. Download and install the standalone [AdminTool](https://www.smartfoxserver.com/download/sfs2x#p=extras).
-1. Login with:
+2. Login with:
     - IP Address: 127.0.0.1
     - Port: 9339
     - username: sfsadmin
