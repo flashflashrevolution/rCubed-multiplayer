@@ -13,18 +13,83 @@
 			"group": {
 				"kind": "build",
 				"isDefault": true
+			},
+			"presentation": {
+				"reveal": "never",
 			}
 		},
 		{
-			"type": "shell",
-			"label": "Develop Build",
-			"command": [
-				"javac",
-				"--class-path=sfs/SFS_PRO_1.6.6/Server/lib/json.jar:sfs/SFS_PRO_1.6.6/Server/lib/json-lib-2.1-jdk15.jar:sfs/SFS_PRO_1.6.6/Server/lib/jysfs.jar:lib/sqlbuilder-3.0.1.jar",
-				"src/**/*.java"
+			"label": "tunnel_and_start",
+			"dependsOn": [
+				"tunnel",
+				"start_sfs2x",
 			],
-			"problemMatcher": [],
-			"group": "build"
+			"dependsOrder": "sequence",
+		},
+		{
+			"label": "terminate",
+			"command": "echo ${input:terminate}",
+			"type": "shell",
+		},
+		{
+			"label": "start_sfs2x",
+			"type": "shell",
+			"runOptions": {
+				"instanceLimit": 1
+			},
+			"isBackground": true,
+			"command": "./start.sh",
+			"problemMatcher": [
+				{
+					"pattern": [
+						{
+							"regexp": ".",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					],
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": ".",
+						"endsPattern": ".",
+					}
+				}
+			]
+		},
+		{
+			"label": "tunnel",
+			"type": "shell",
+			"runOptions": {
+				"instanceLimit": 1
+			},
+			"isBackground": true,
+			"command": "ssh -L 3306:dblocalhost:3306 flashfla@flashflashrevolution.com",
+			"problemMatcher": [
+				{
+					"pattern": [
+						{
+							"regexp": ".",
+							"file": 1,
+							"location": 2,
+							"message": 3
+						}
+					],
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": ".",
+						"endsPattern": ".",
+					}
+				}
+			]
+		}
+	],
+	"inputs": [
+		{
+			"id": "terminate",
+			"type": "command",
+			"command": "workbench.action.tasks.terminate",
+			"args": "terminateAll"
 		}
 	]
 }
