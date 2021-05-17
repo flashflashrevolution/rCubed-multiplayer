@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><serverSettings>
+<serverSettings>
   <socketAddresses>
     <socket address="0.0.0.0" port="9933" type="TCP"/>
     <socket address="127.0.0.1" port="9933" type="UDP"/>
@@ -27,20 +27,19 @@
       <adminUser>
         <login>sfsadmin</login>
         <password>password</password>
+        <allowHalt>true</allowHalt>
+        <disabledModules/>
       </adminUser>
     </administrators>
-    <allowedRemoteAddresses>
-    </allowedRemoteAddresses>
+    <allowedRemoteAddresses/>
     <adminTcpPort>-1</adminTcpPort>
     <useEncryption>false</useEncryption>
   </remoteAdmin>
   <bannedUserManager>
     <isAutoRemove>true</isAutoRemove>
     <isPersistent>true</isPersistent>
-    <customPersistenceClass/>
+    <customPersistenceClass></customPersistenceClass>
   </bannedUserManager>
-  <extensionRemoteDebug>true</extensionRemoteDebug>
-  <useFriendlyExceptions>true</useFriendlyExceptions>
   <mailer>
     <isActive>false</isActive>
     <mailHost>your.smtp.here</mailHost>
@@ -53,48 +52,64 @@
     <isActive>true</isActive>
     <blueBoxPollingTimeout>26</blueBoxPollingTimeout>
     <blueBoxMsgQueueSize>40</blueBoxMsgQueueSize>
-	 <isWSActive>true</isWSActive>
+    <isXForwardedForActive>false</isXForwardedForActive>
+    <allowedWebsocketOrigins/>
+    <isWSActive>true</isWSActive>
+    <gHttpPort>8080</gHttpPort>
+    <gHttpsPort>8443</gHttpsPort>
   </webServer>
-  <analytics>
-    <isActive>false</isActive>
-    <runOnDay>[everyday]</runOnDay>
-    <runAtHour>2</runAtHour>
-    <runOnStartup>false</runOnStartup>
-    <rebuildDB>false</rebuildDB>
-    <skipGeolocation>false</skipGeolocation>
-    <sourceFolder/>
-    <locale/>
-  </analytics>
- <systemThreadPoolSettings>
-   <name>Sys</name>
-   <coreThreads>4</coreThreads>
-   <backupThreads>16</backupThreads>
-   <maxBackups>64</maxBackups>
-   <queueSizeTriggeringBackup>100</queueSizeTriggeringBackup>
-   <secondsTriggeringBackup>50</secondsTriggeringBackup>
-   <backupThreadsExpiry>3600</backupThreadsExpiry>
-   <queueSizeTriggeringBackupExpiry>60</queueSizeTriggeringBackupExpiry>
-   <logActivity>true</logActivity>
-   <queueFullWarningInterval>300</queueFullWarningInterval>
- </systemThreadPoolSettings>
- <extensionThreadPoolSettings>
-   <name>Ext</name>
-   <coreThreads>4</coreThreads>
-   <backupThreads>16</backupThreads>
-   <maxBackups>64</maxBackups>
-   <queueSizeTriggeringBackup>100</queueSizeTriggeringBackup>
-   <secondsTriggeringBackup>50</secondsTriggeringBackup>
-   <backupThreadsExpiry>3600</backupThreadsExpiry>
-   <queueSizeTriggeringBackupExpiry>60</queueSizeTriggeringBackupExpiry>
-   <logActivity>true</logActivity>
-   <queueFullWarningInterval>300</queueFullWarningInterval>
- </extensionThreadPoolSettings>
   <startExtensionFileMonitor>true</startExtensionFileMonitor>
   <useDebugMode>true</useDebugMode>
+  <extensionRemoteDebug>true</extensionRemoteDebug>
+  <useFriendlyExceptions>true</useFriendlyExceptions>
   <sessionMaxIdleTime>30</sessionMaxIdleTime>
   <userMaxIdleTime>300</userMaxIdleTime>
-  <licenseCode/>
-  <licenseEmails/>
+  <licenseCode></licenseCode>
+  <licenseEmails></licenseEmails>
+  <maxCcuAlert>false</maxCcuAlert>
   <ghostHunterEnabled>true</ghostHunterEnabled>
   <statsExtraLoggingEnabled>true</statsExtraLoggingEnabled>
+  <enableSmasherController>true</enableSmasherController>
+  <analytics>
+    <isActive>false</isActive>
+    <runOnDay>[everyday]</runOnDay>
+    <runAtHour>2</runAtHour>
+    <runOnStartup>false</runOnStartup>
+    <rebuildDB>false</rebuildDB>
+    <skipGeolocation>false</skipGeolocation>
+    <sourceFolder></sourceFolder>
+    <locale></locale>
+  </analytics>
+  <systemThreadPoolSettings>
+    <name>Sys</name>
+    <coreThreads>4</coreThreads>
+    <backupThreads>16</backupThreads>
+    <maxBackups>64</maxBackups>
+    <queueSizeTriggeringBackup>100</queueSizeTriggeringBackup>
+    <secondsTriggeringBackup>50</secondsTriggeringBackup>
+    <backupThreadsExpiry>3600</backupThreadsExpiry>
+    <queueSizeTriggeringBackupExpiry>60</queueSizeTriggeringBackupExpiry>
+    <logActivity>true</logActivity>
+    <queueFullWarningInterval>300</queueFullWarningInterval>
+    <prestartAllCoreThreads>false</prestartAllCoreThreads>
+  </systemThreadPoolSettings>
+  <extensionThreadPoolSettings>
+    <name>Ext</name>
+    <coreThreads>4</coreThreads>
+    <backupThreads>16</backupThreads>
+    <maxBackups>64</maxBackups>
+    <queueSizeTriggeringBackup>100</queueSizeTriggeringBackup>
+    <secondsTriggeringBackup>50</secondsTriggeringBackup>
+    <backupThreadsExpiry>3600</backupThreadsExpiry>
+    <queueSizeTriggeringBackupExpiry>60</queueSizeTriggeringBackupExpiry>
+    <logActivity>true</logActivity>
+    <queueFullWarningInterval>300</queueFullWarningInterval>
+    <prestartAllCoreThreads>false</prestartAllCoreThreads>
+  </extensionThreadPoolSettings>
+  <serverName></serverName>
+  <allowClientUdpPortChanges>false</allowClientUdpPortChanges>
+  <clientBlueBoxSettings>
+    <useBlueBox>true</useBlueBox>
+    <blueBoxPollingRate>700</blueBoxPollingRate>
+  </clientBlueBoxSettings>
 </serverSettings>
