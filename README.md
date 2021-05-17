@@ -54,7 +54,7 @@ ssh -L 3306:dblocalhost:3306 flashfla@flashflashrevolution.com
     ```zsh
     ./start.sh
     ```
-1. Attach to the server with `F5`. (The server will not start until you do this.)
+2. Attach to debug with `F5`.
 
 ## Server Admin Tool (Optional)
 
@@ -64,4 +64,3 @@ ssh -L 3306:dblocalhost:3306 flashfla@flashflashrevolution.com
     - Port: 9339
     - username: sfsadmin
     - password: password
-1. Note: You will be unable to log in if you have not attached to the server with `F5`.
