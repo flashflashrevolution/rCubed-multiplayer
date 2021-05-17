@@ -39,6 +39,10 @@
 			},
 			"isBackground": true,
 			"command": "./start.sh",
+			"presentation": {
+				"reveal": "never",
+				"panel": "shared",
+			},
 			"problemMatcher": [
 				{
 					"pattern": [
@@ -65,6 +69,10 @@
 			},
 			"isBackground": true,
 			"command": "ssh -L 3306:dblocalhost:3306 flashfla@flashflashrevolution.com",
+			"presentation": {
+				"reveal": "never",
+				"panel": "shared",
+			},
 			"problemMatcher": [
 				{
 					"pattern": [
