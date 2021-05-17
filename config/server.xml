@@ -106,7 +106,7 @@
     <queueFullWarningInterval>300</queueFullWarningInterval>
     <prestartAllCoreThreads>false</prestartAllCoreThreads>
   </extensionThreadPoolSettings>
-  <serverName></serverName>
+  <serverName>Flash Flash Revolution</serverName>
   <allowClientUdpPortChanges>false</allowClientUdpPortChanges>
   <clientBlueBoxSettings>
     <useBlueBox>true</useBlueBox>
