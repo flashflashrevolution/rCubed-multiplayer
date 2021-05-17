@@ -14,28 +14,30 @@ import com.smartfoxserver.v2.extensions.BaseServerEventHandler;
 
 public class ZoneJoinEventHandler extends BaseServerEventHandler {
 
-    @Override
-    public void handleServerEvent(ISFSEvent event) throws SFSException {
+	@Override
+	public void handleServerEvent(ISFSEvent event) throws SFSException {
 		User theUser = (User) event.getParameter(SFSEventParam.USER);
-		
+
 		// dbid is a hidden UserVariable, available only server side
-		UserVariable uv_dbId = new SFSUserVariable("dbid", theUser.getSession().getProperty(MultiplayerExtension.DATABASE_ID));
+		UserVariable uv_dbId = new SFSUserVariable("dbid",
+				theUser.getSession().getProperty(MultiplayerExtension.DATABASE_ID));
 		uv_dbId.setHidden(true);
-		
+
 		// The avatar UserVariable is a regular UserVariable
 		UserVariable uv_avatar = new SFSUserVariable("avatar", "avatar_" + theUser.getName() + ".jpg");
-		
+
 		// Set the variables
 		List<UserVariable> vars = Arrays.asList(uv_dbId, uv_avatar);
 		getApi().setUserVariables(theUser, vars);
-		
+
 		// Join the user
 		Room lobby = getParentExtension().getParentZone().getRoomByName("The Lobby");
-		
+
 		if (lobby == null)
-			throw new SFSException("The Lobby Room was not found! Make sure a Room called 'The Lobby' exists in the Zone to make this example work correctly.");
-		
+			throw new SFSException(
+					"The Lobby Room was not found! Make sure a Room called 'The Lobby' exists in the Zone to make this example work correctly.");
+
 		getApi().joinRoom(theUser, lobby);
-    }
+	}
 
 }
