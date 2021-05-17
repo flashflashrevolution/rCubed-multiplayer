@@ -33,6 +33,12 @@ if git diff --quiet HEAD -- ':!bootstrap.sh'; then
     rm -rf /workspaces/rCubed-multiplayer/sfs/SFS2X/config
     ln -sfv /workspaces/rCubed-multiplayer/config /workspaces/rCubed-multiplayer/sfs/SFS2X/
 
+    echo "\nConfigure SFS2X vmoptions"
+    rm -rf /workspaces/rCubed-multiplayer/sfs/SFS2X/sfs2x-service.vmoptions
+    rm -rf /workspaces/rCubed-multiplayer/sfs/SFS2X/sfs2x-standalone.vmoptions
+    ln -sfv /workspaces/rCubed-multiplayer/sfs/SFS2X/config/sfs2x-service.vmoptions /workspaces/rCubed-multiplayer/sfs/SFS2X/sfs2x-service.vmoptions
+    ln -sfv /workspaces/rCubed-multiplayer/sfs/SFS2X/config/sfs2x-standalone.vmoptions /workspaces/rCubed-multiplayer/sfs/SFS2X/sfs2x-standalone.vmoptions
+
     # Replace the embedded SmartFox JDK with our downloaded one.
     echo "\nReplace embedded JDK with downloaded one."
     rm -rf sfs/jre
