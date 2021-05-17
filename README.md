@@ -32,6 +32,10 @@ code .
 ## Bootstrap (Required)
 
 ```zsh
+# You may need to run the following command to enable execution of bootstrap.
+# And if you ever run in to issues with ./start, run this command.
+chmod +x bootstrap.sh start.sh
+
 # Read, and then run, the following file.
 ./bootstrap.sh
 ```
