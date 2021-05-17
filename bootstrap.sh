@@ -1,45 +1,37 @@
-# Reset
-echo "\nReset"
-rm -rf sfs
-rm -rf jdk
+if git diff-index --quiet HEAD -- ':!bootstrap.sh'; then
+    # Reset
+    echo "\nReset"
+    git clean -fdx
 
-# Install JDK
-echo "\nInstall JDK"
-#wget -nc -O openjdk.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u292-b10/OpenJDK8U-jdk_x64_linux_hotspot_8u292b10.tar.gz # JDK 1.8
-#wget -nc -O openjdk.tar.gz https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.11_9.tar.gz # JDK 11
-wget -nc -O openjdk.tar.gz https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk-15.0.2%2B7/OpenJDK15U-jdk_x64_linux_hotspot_15.0.2_7.tar.gz # JDK 15
-mkdir -p jdk
-pv openjdk.tar.gz | tar --strip-components=1 --no-overwrite-dir -zxf - -C ./jdk
+    # Install JDK
+    echo "\nInstall JDK"
+    #wget -nc -O openjdk.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u292-b10/OpenJDK8U-jdk_x64_linux_hotspot_8u292b10.tar.gz # JDK 1.8
+    #wget -nc -O openjdk.tar.gz https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.11%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.11_9.tar.gz # JDK 11
+    wget -nc -O openjdk.tar.gz https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk-15.0.2%2B7/OpenJDK15U-jdk_x64_linux_hotspot_15.0.2_7.tar.gz # JDK 15
+    mkdir -p jdk
+    pv openjdk.tar.gz | tar --strip-components=1 --no-overwrite-dir -zxf - -C ./jdk
 
-# Install SmartFoxServer 1.6.6
-echo "\nInstall SmartFoxServer 1.6.6"
-wget -nc -O sfs-1.6.6.tar.gz https://www.smartfoxserver.com/downloads/sfs1/SFSPRO_linux64_1.6.6.tar.gz
-mkdir -p sfs-temp
-pv sfs-1.6.6.tar.gz | tar --strip-components=1 --no-overwrite-dir -zxf - -C ./sfs-temp
-cd sfs-temp
-printf "$(dirname "$(cd -P -- "$(dirname -- "$0")" && pwd -P)")"/sfs | ./install
+    # Install SmartFoxServer 2.17.0
+    echo "\nInstall SmartFoxServer 2X 2.17.0"
+    wget -nc -O sfs2x-2.17.0.tar.gz https://www.smartfoxserver.com/downloads/sfs2x/SFS2X_unix_2_17_0.tar.gz
+    mkdir -p sfs
+    pv sfs2x-2.17.0.tar.gz | tar --strip-components=1 --no-overwrite-dir -zxf - -C ./sfs
 
-# Install SmartFoxServer 1.6.20 Patch
-echo "\nInstall SmartFoxServer 1.6.20 Patch"
-cd ..
-wget -nc -O sfs-patch-1.6.20.zip https://www.smartfoxserver.com/downloads/sfs1/SFSPRO_Patch_1.6.20.zip
-unzip -o sfs-patch-1.6.20.zip -d sfs-patch
-cp --verbose -rf sfs-patch/SFSPRO_Patch_1.6.20/Server/ sfs/SFS_PRO_1.6.6/Server/lib
+    echo "\nRemove Build Artifacts"
+    rm -f openjdk.tar.gz
+    rm -f sfs2x-2.17.0.tar.gz
 
-echo "\nRemove Build Artifacts"
-rm -f openjdk.tar.gz
-rm -f sfs-1.6.6.tar.gz
-rm -f sfs-patch-1.6.20.zip
-rm -rf sfs-temp
-rm -rf sfs-patch
-
-# Git Configuration
-echo "\nGit Configuration"
-git config --local core.fileMode false
-git lfs pull
-git config --local core.editor "code --wait"
+    # Git Configuration
+    echo "\nGit Configuration"
+    git config --local core.fileMode false
+    git lfs pull
+    git config --local core.editor "code --wait"
 
 
-# Config Configuration
-echo "\nConfig ln Configuration"
-ln -sfv /workspaces/rCubed-multiplayer/config /workspaces/rCubed-multiplayer/sfs/SFS_PRO_1.6.6/Server/
+    # Config Configuration
+    echo "\nConfig ln Configuration"
+    rm -rf /workspaces/rCubed-multiplayer/sfs/SFS2X/config
+    ln -sfv /workspaces/rCubed-multiplayer/config /workspaces/rCubed-multiplayer/sfs/SFS2X/
+else
+    echo "You have uncommitted changes, please stash or commit before bootstrapping."
+fi

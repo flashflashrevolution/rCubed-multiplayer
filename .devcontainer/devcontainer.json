@@ -43,5 +43,6 @@
 	"mounts": [
 		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh/,target=/root/.ssh,type=bind,consistency=cached",
 		"source=sfs-new-bashhistory,target=/commandhistory,type=volume"
-	]
+	],
+	"remoteUser": "vscode"
 }
