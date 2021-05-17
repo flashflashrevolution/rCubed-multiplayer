@@ -10,6 +10,7 @@ config.production.xml
 
 # SmartFox Server
 sfs/
+config/_backups
 
 # Bootstrap Stage
 sfs-temp/
