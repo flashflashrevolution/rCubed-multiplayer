@@ -6,7 +6,8 @@ lib/ffr/MultiplayerExtension.jar
 *.class
 
 # Configuration
-ZoneWithDatabase.zone.xml
+zones/
+!zones/BasicExamples.zone.xml
 
 # SmartFox Server
 sfs/
