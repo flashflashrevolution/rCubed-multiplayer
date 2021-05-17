@@ -8,7 +8,7 @@
 		"java.configuration.runtimes": [
 			{
 				"default": true,
-				"name": "JavaSE-15",
+				"name": "JavaSE-16",
 				"path": "/workspaces/rCubed-multiplayer/jdk/"
 			}
 		],
