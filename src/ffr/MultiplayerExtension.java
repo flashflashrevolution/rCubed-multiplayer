@@ -7,7 +7,7 @@ public class MultiplayerExtension extends SFSExtension {
 
     @Override
     public void init() {
-        trace("Database Login Extension -- started");
+        trace("Multiplayer Extension -- started");
         addEventHandler(SFSEventType.USER_LOGIN, LoginEventHandler.class);
         addEventHandler(SFSEventType.USER_JOIN_ZONE, ZoneJoinEventHandler.class);
     }
@@ -15,6 +15,6 @@ public class MultiplayerExtension extends SFSExtension {
     @Override
     public void destroy() {
         super.destroy();
-        trace("Database Login Extension -- stopped");
+        trace("Multiplayer Extension -- stopped");
     }
 }
