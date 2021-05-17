@@ -43,7 +43,9 @@ chmod +x bootstrap.sh start.sh
 ## MySQL Connection (Optional)
 
 - You will require access to the server for this to work.
-- config.develop.xml has the DatabaseManager turned off be default.
+- BasicExamples.zone.xml has the DatabaseManager turned off by default.
+- Set `databaseManager active="true"` and fill in the password in a **separate** zone.xml file
+Do not add MySQL info any zone file that can be checked in to the depo to prevent accidental checkin.
 - Make sure there is a safe code path when a database cannot be connected to.
 
 ```zsh
