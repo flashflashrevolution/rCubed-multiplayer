@@ -4,6 +4,8 @@
 	"name": "Java",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
+		"java.autobuild.enabled": true,
+		"java.saveActions.organizeImports": true,
 		"java.home": "/docker-java-home",
 		"java.configuration.runtimes": [
 			{
