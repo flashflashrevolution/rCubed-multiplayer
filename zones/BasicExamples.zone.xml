@@ -144,15 +144,15 @@
     </buddyStates>
     <badWordsFilter isActive="true"/>
   </buddyList>
-  <databaseManager active="true">
-    <driverName>com.mysql.jdbc.Driver</driverName>
-    <connectionString>jbdc:mysql://127.0.0.1:3306/ffr_vb2</connectionString>
-    <userName>ffrplayer</userName>
+  <databaseManager active="false">
+    <driverName></driverName>
+    <connectionString></connectionString>
+    <userName></userName>
     <password></password>
-    <testSql>SELECT COUNT(*) FROM vb_user</testSql>
+    <testSql></testSql>
     <maxActiveConnections>10</maxActiveConnections>
     <maxIdleConnections>10</maxIdleConnections>
-    <exhaustedPoolAction>GROW</exhaustedPoolAction>
+    <exhaustedPoolAction>FAIL</exhaustedPoolAction>
     <blockTime>3000</blockTime>
   </databaseManager>
   <maxFindUserResults>50</maxFindUserResults>
