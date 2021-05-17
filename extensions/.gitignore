@@ -1,0 +1,4 @@
+*
+!.gitignore
+!__lib__/
+!__lib__/.gitkeep

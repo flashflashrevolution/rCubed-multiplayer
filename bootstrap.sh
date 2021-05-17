@@ -18,6 +18,21 @@ if git diff --quiet HEAD -- ':!bootstrap.sh'; then
     mkdir -p sfs
     pv sfs2x-2.17.0.tar.gz | tar --strip-components=1 --no-overwrite-dir -zxf - -C ./sfs
 
+    # Configure SFS2X Extensions path
+    echo "\nConfigure SFS2X Extensions path"
+    rm -rf sfs/SFS2X/extensions
+    ln -sfv /workspaces/rCubed-multiplayer/extensions /workspaces/rCubed-multiplayer/sfs/SFS2X/extensions
+
+    # Configure SFS2X Zones path
+    echo "\nConfigure SFS2X Zones path"
+    rm -rf sfs/SFS2X/zones
+    ln -sfv /workspaces/rCubed-multiplayer/zones /workspaces/rCubed-multiplayer/sfs/SFS2X/zones
+
+    # Configure SFS2X Config path
+    echo "\nConfigure SFS2X Config path"
+    rm -rf /workspaces/rCubed-multiplayer/sfs/SFS2X/config
+    ln -sfv /workspaces/rCubed-multiplayer/config /workspaces/rCubed-multiplayer/sfs/SFS2X/
+
     # Replace the embedded SmartFox JDK with our downloaded one.
     echo "\nReplace embedded JDK with downloaded one."
     rm -rf sfs/jre
@@ -33,11 +48,6 @@ if git diff --quiet HEAD -- ':!bootstrap.sh'; then
     git lfs pull
     git config --local core.editor "code --wait"
 
-
-    # Config Configuration
-    echo "\nConfig ln Configuration"
-    rm -rf /workspaces/rCubed-multiplayer/sfs/SFS2X/config
-    ln -sfv /workspaces/rCubed-multiplayer/config /workspaces/rCubed-multiplayer/sfs/SFS2X/
 else
     echo "You have uncommitted changes, please stash or commit before bootstrapping."
 fi

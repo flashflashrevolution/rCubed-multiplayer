@@ -3,14 +3,17 @@
 	"tasks": [
 		{
 			"type": "java",
-			"label": "Export Jar",
-			"targetPath": "${workspaceFolder}/lib/MultiplayerExtension.jar",
+			"label": "Export MultiplayerExtension Jar",
+			"targetPath": "${workspaceFolder}/extensions/MultiplayerExtension/MultiplayerExtension.jar",
 			"elements": [
 				"${compileOutput}",
 				"${dependencies}"
 			],
 			"problemMatcher": [],
-			"group": "build"
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
 		},
 		{
 			"type": "shell",
@@ -21,10 +24,7 @@
 				"src/**/*.java"
 			],
 			"problemMatcher": [],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
+			"group": "build"
 		}
 	]
 }

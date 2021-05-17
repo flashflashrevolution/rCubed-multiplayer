@@ -26,7 +26,7 @@
     <administrators>
       <adminUser>
         <login>sfsadmin</login>
-        <password>sfsadmin</password>
+        <password>password</password>
       </adminUser>
     </administrators>
     <allowedRemoteAddresses>
