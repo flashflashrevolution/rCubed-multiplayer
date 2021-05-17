@@ -1,4 +1,5 @@
 *
 !.gitignore
-!__lib__/
-!__lib__/.gitkeep
+
+!__lib__
+!__lib__/*
