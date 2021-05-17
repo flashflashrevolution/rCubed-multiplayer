@@ -34,6 +34,32 @@
 	// "postCreateCommand": "java -version",
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	//"remoteUser": "vscode",
+	"portsAttributes": {
+		"3306": {
+			"label": "SSH Tunnel",
+			"onAutoForward": "silent"
+		},
+		"8005":{
+			"label": "Unknown",
+			"onAutoForward": "silent"
+		},
+		"8443":{
+			"label": "HTTPS Server",
+			"onAutoForward": "silent"
+		},
+		"8787":{
+			"label": "Debugger",
+			"onAutoForward": "silent"
+		},
+		"9933":{
+			"label": "Admin Tool and Client Socket",
+			"onAutoForward": "silent"
+		},
+		"46303":{
+			"label": "Java Language Server",
+			"onAutoForward": "silent"
+		}
+	},
 	"build": {
 		"dockerfile": "Dockerfile",
 	},
