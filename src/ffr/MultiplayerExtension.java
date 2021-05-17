@@ -5,6 +5,8 @@ import com.smartfoxserver.v2.extensions.SFSExtension;
 
 public class MultiplayerExtension extends SFSExtension {
 
+    public static final String DATABASE_ID = "ffr_vb2";
+
     @Override
     public void init() {
         trace("Multiplayer Extension -- started");
