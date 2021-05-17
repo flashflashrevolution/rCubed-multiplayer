@@ -1,4 +1,4 @@
-if git diff-index --quiet HEAD -- ':!bootstrap.sh'; then
+if git diff --quiet HEAD -- ':!bootstrap.sh'; then
     # Reset
     echo "\nReset"
     git clean -fdx
