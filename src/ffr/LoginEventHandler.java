@@ -32,14 +32,14 @@ public class LoginEventHandler extends BaseServerEventHandler {
             connection = dbManager.getConnection();
 
             // Build a prepared statement
-            PreparedStatement stmt = connection.prepareStatement("SELECT pword,id FROM muppets WHERE name=?");
+            PreparedStatement stmt = connection.prepareStatement("SELECT userid, usergroupid, password FROM vb_user WHERE username =?");
             stmt.setString(1, userName);
 
             // Execute query
             ResultSet res = stmt.executeQuery();
 
             // Verify that one record was found
-            if (!res.first()) {
+            if (!res.next()) {
                 // This is the part that goes to the client
                 SFSErrorData errData = new SFSErrorData(SFSErrorCode.LOGIN_BAD_USERNAME);
                 errData.addParameter(userName);
@@ -48,11 +48,12 @@ public class LoginEventHandler extends BaseServerEventHandler {
                 throw new SFSLoginException("Bad user name: " + userName, errData);
             }
 
-            String dbPword = res.getString("pword");
-            int dbId = res.getInt("id");
+            int userid = res.getInt("userid");
+            int userGroupId = res.getInt("usergroupid");
+            String password = res.getString("password");
 
             // Verify the secure password
-            if (!getApi().checkSecurePassword(session, dbPword, cryptedPass)) {
+            if (!getApi().checkSecurePassword(session, password, cryptedPass)) {
                 SFSErrorData data = new SFSErrorData(SFSErrorCode.LOGIN_BAD_PASSWORD);
                 data.addParameter(userName);
 
@@ -60,7 +61,7 @@ public class LoginEventHandler extends BaseServerEventHandler {
             }
 
             // Store the client dbId in the session
-            session.setProperty(MultiplayerExtension.DATABASE_ID, dbId);
+            session.setProperty(MultiplayerExtension.DATABASE_ID, userid);
         }
 
         // User name was not found
